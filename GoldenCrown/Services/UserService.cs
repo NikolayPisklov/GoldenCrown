@@ -21,29 +21,31 @@ namespace GoldenCrown.Services
 
         public async Task<bool> RegisterAsync(string login, string password, string name)
         {
-            if(await _db.Users.AnyAsync(u => login == u.Login))
+            if (await _db.Users.AnyAsync(u => login == u.Login))
             {
                 return false;
             }
-            if(string.IsNullOrWhiteSpace(password) || password.Length < 6) 
+            var user = new User
             {
-                return false;
-            }
-            var user = new User();
-            user.Login = login;
-            user.Password = password;
-            user.Name = name;
+                Login = login,
+                Password = password,
+                Name = name
+            };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
-            
-            var registeredUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == login);
-            if(registeredUser is null)
-            {
-                throw new Exception("Something went wrong!");
-            }
 
-            await _accountService.CreateAccountAsync(registeredUser.Id);
+            await CreateAccountForUser(login);
             return true;
+        }
+
+        private async Task CreateAccountForUser(string login)
+        {
+            var registeredUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == login);
+            if (registeredUser is null)
+            {
+                throw new InvalidOperationException("User is not found.");
+            }
+            await _accountService.CreateAccountAsync(registeredUser.Id);
         }
     }
 }
