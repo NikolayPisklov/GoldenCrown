@@ -71,3 +71,5 @@ _ReSharper*/
 # Temporary
 tmp/
 temp/
+
+appsettings.Development.json
