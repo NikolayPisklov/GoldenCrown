@@ -1,4 +1,4 @@
-using GoldenCrown.Models;
+using GoldenCrown.Database;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
