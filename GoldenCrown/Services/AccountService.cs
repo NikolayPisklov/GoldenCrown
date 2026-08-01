@@ -3,10 +3,6 @@ using GoldenCrown.Models;
 
 namespace GoldenCrown.Services
 {
-    public interface IAccountService
-    {
-        public Task CreateAccountAsync(int userId);
-    }
     public class AccountService : IAccountService
     {
         private readonly GoldenCrownDbContext _db;

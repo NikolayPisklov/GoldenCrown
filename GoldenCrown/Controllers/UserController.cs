@@ -28,9 +28,10 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpPost("/login")]
-        public IActionResult Login()
+        public async Task<IActionResult> Login(LoginRequest request)
         {
-            return Ok();
+            var token = await _userService.LoginAsync(request.Login, request.Password);
+            return Ok(new LoginResponse { Token = token});
         }
 
     }

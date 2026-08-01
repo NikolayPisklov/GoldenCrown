@@ -4,11 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoldenCrown.Services
 {
-    public interface IUserService
-    {
-        Task<string> Login(string login, string password);
-        public Task<bool> RegisterAsync(string login, string password, string name);
-    }
     public class UserService : IUserService
     {
         private readonly GoldenCrownDbContext _db;
@@ -38,7 +33,7 @@ namespace GoldenCrown.Services
             await CreateAccountForUserAsync(login);
             return true;
         }
-        public async Task<string> Login(string login, string password)
+        public async Task<string> LoginAsync(string login, string password)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => login == u.Login);
             if(user is null)
@@ -47,7 +42,7 @@ namespace GoldenCrown.Services
             }
             if(!string.Equals(user.Password, password)) 
             {
-                throw new InvalidOperationException("Password is not correct!");
+                throw new InvalidOperationException("Login or password is not correct!");
             }
             string token = Guid.NewGuid().ToString();
             DateTime expiresAt = DateTime.UtcNow.AddHours(1);
