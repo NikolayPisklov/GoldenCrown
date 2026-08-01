@@ -6,6 +6,7 @@ namespace GoldenCrown.Services
 {
     public interface IUserService
     {
+        Task<string> Login(string login, string password);
         public Task<bool> RegisterAsync(string login, string password, string name);
     }
     public class UserService : IUserService
@@ -34,11 +35,40 @@ namespace GoldenCrown.Services
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            await CreateAccountForUser(login);
+            await CreateAccountForUserAsync(login);
             return true;
         }
-
-        private async Task CreateAccountForUser(string login)
+        public async Task<string> Login(string login, string password)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => login == u.Login);
+            if(user is null)
+            {
+                throw new InvalidOperationException("User is not found.");
+            }
+            if(!string.Equals(user.Password, password)) 
+            {
+                throw new InvalidOperationException("Password is not correct!");
+            }
+            string token = Guid.NewGuid().ToString();
+            DateTime expiresAt = DateTime.UtcNow.AddHours(1);
+            var session = new Session() 
+            {
+                UserId = user.Id,
+                Token = token,
+                ExpiresAt = expiresAt
+            };
+            _db.Sessions.Add(session);
+            try 
+            {  
+                await _db.SaveChangesAsync();
+                return token;
+            }
+            catch (DbUpdateException exception) 
+            {
+                throw new InvalidOperationException("You are already logged in.", exception);
+            }
+        }
+        private async Task CreateAccountForUserAsync(string login)
         {
             var registeredUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == login);
             if (registeredUser is null)
