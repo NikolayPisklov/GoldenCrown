@@ -25,7 +25,7 @@ namespace GoldenCrown.Services
             {
                 return false;
             }
-            if(password.Length < 6) 
+            if(string.IsNullOrWhiteSpace(password) || password.Length < 6) 
             {
                 return false;
             }
