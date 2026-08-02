@@ -7,7 +7,7 @@ namespace GoldenCrown.Dtos.Account
         [Required(ErrorMessage = "Токен обязателен для заполнения.")]
         public string Token { get; set; } = null!;
 
-        [Range(typeof(decimal), "0.01", "79228162514264337593543950335", ErrorMessage = "Сумма должна быть больше 0.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Сумма должна быть больше 0.")]
         public decimal Amount { get; set; }
     }
 }

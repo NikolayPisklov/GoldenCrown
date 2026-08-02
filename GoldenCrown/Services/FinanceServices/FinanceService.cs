@@ -1,5 +1,6 @@
 ﻿using GoldenCrown.Common;
 using GoldenCrown.Database;
+using GoldenCrown.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoldenCrown.Services.FinanceServices
@@ -13,17 +14,59 @@ namespace GoldenCrown.Services.FinanceServices
             _db = db;
         }
 
+
+        public async Task<Result> DepositAsync(string token, decimal amount)
+        {
+            var sessionResult = await IsSessionValid(token);
+            if (!sessionResult)
+            {
+                return Result<decimal>.Failure(sessionResult.ErrorMessage!);
+            }
+            var session = sessionResult.Value!;
+            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == session.UserId);
+            if (account is null)
+                throw new InvalidOperationException("Счёт пользователя не найден.");
+            account.Balance += amount;
+            var transaction = new Transaction()
+            {
+                SenderAccountId = account.Id,
+                ReceiverAccountId = account.Id,
+                Date = DateTime.UtcNow,
+                Amount = amount
+            };
+            _db.Transactions.Add(transaction);
+            try
+            {
+                await _db.SaveChangesAsync();
+                return Result.Success();
+            }
+            catch (Exception) 
+            {
+                throw;
+            }
+        }
         public async Task<Result<decimal>> GetBalanceAsync(string token)
         {
-            var session = await _db.Sessions.FirstOrDefaultAsync(x => x.Token == token);
-            if(session is null)
-                return Result<decimal>.Failure("Сессия не найдена.");
-            if (session.ExpiresAt < DateTime.UtcNow) 
-                return Result<decimal>.Failure("Время сессии истекло");
+            var sessionResult = await IsSessionValid(token);
+            if (!sessionResult) 
+            {
+                return Result<decimal>.Failure(sessionResult.ErrorMessage!);
+            }
+            var session = sessionResult.Value!;
             var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == session.UserId);
             if (account is null)
                 throw new InvalidOperationException("Счёт пользователя не найден.");
             return Result<decimal>.Success(account.Balance);
+        }
+
+        private async Task<Result<Session>> IsSessionValid(string token)
+        {
+            var session = await _db.Sessions.FirstOrDefaultAsync(x => x.Token == token);
+            if (session is null)
+                return Result<Session>.Failure("Сессия не найдена.");
+            if (session.ExpiresAt < DateTime.UtcNow)
+                return Result<Session>.Failure("Время сессии истекло");
+            return Result<Session>.Success(session);
         }
     }
 }
