@@ -1,5 +1,4 @@
 using GoldenCrown.Database;
-using GoldenCrown.Services.FInanceService;
 using GoldenCrown.Services.FinanceServices;
 using GoldenCrown.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
