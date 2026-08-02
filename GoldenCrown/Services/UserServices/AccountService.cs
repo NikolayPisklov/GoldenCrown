@@ -2,7 +2,7 @@
 using GoldenCrown.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Services
+namespace GoldenCrown.Services.UserServices
 {
     public class AccountService : IAccountService
     {
