@@ -1,5 +1,6 @@
 ﻿using GoldenCrown.Database;
 using GoldenCrown.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GoldenCrown.Services
 {
@@ -18,7 +19,14 @@ namespace GoldenCrown.Services
             account.UserId = userId;
             account.Balance = 0;
             _db.Accounts.Add(account);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
         }
     }
 }

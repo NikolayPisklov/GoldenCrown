@@ -18,20 +18,29 @@ namespace GoldenCrown.Controllers
         [HttpPost("/register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
-            if(await _userService.RegisterAsync(request.Login, request.Password, request.Name)) 
+            var result = await _userService.RegisterAsync(request.Login, request.Password, request.Name);
+            if (result) 
             {
                 return Ok();
             }
             else
             {
-                return BadRequest();
+                return BadRequest(result.ErrorMessage);
             }
         }
         [HttpPost("/login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var token = await _userService.LoginAsync(request.Login, request.Password);
-            return Ok(new LoginResponse { Token = token});
+            var result = await _userService.LoginAsync(request.Login, request.Password);
+            if (result)
+            {
+                return Ok(new LoginResponse { Token = result.Value! });
+            }
+            else
+            {
+                return NotFound();
+            }
+
         }
 
     }
