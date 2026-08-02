@@ -34,7 +34,20 @@ namespace GoldenCrown.Controllers
             var result = await _financeService.DepositAsync(request.Token, request.Amount);
             if (result)
             {
-                return Ok();
+                return Ok(new BalanceResponse { Balance = result.Value});
+            }
+            else
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+        }
+        [HttpPost("transfer")]
+        public async Task<IActionResult> Transfer(TransferRequest request)
+        {
+            var result = await _financeService.TransferAsync(request.Token, request.ReceiverLogin, request.Amount);
+            if (result)
+            {
+                return Ok(new BalanceResponse { Balance = result.Value });
             }
             else
             {
