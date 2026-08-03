@@ -1,4 +1,5 @@
-﻿using GoldenCrown.Dtos.Account;
+﻿using GoldenCrown.Attributes;
+using GoldenCrown.Dtos.Account;
 using GoldenCrown.Services.FinanceServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,7 @@ namespace GoldenCrown.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [GoldenCrownAuth]
     public class FinanceController : ControllerBase
     {
         private readonly IFinanceService _financeService;
@@ -16,7 +18,7 @@ namespace GoldenCrown.Controllers
         }
 
         [HttpGet("balance")]
-        public async Task<IActionResult> GetBalance(string token)
+        public async Task<IActionResult> GetBalance([FromHeader(Name = "Authorization")] string token)
         {
             var result = await _financeService.GetBalanceAsync(token);
             if (result)
@@ -29,9 +31,9 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpGet("get-history")]
-        public async Task<IActionResult> GetHistory([FromQuery]TransactionHistoryRequest request)
+        public async Task<IActionResult> GetHistory([FromQuery]TransactionHistoryRequest request, [FromHeader(Name = "Authorization")] string token)
         {
-            var result = await _financeService.GetTransactionHistoryAsync(request.Token, request.From, request.To, request.Limit, request.Offset);
+            var result = await _financeService.GetTransactionHistoryAsync(token, request.From, request.To, request.Limit, request.Offset);
             if (result)
             {
                 return Ok(new TransactionHistoryResponse() { Transactions = result.Value!});
@@ -42,9 +44,9 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpPost("deposit")]
-        public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
+        public async Task<IActionResult> Deposit([FromBody] DepositRequest request, [FromHeader(Name = "Authorization")] string token)
         {
-            var result = await _financeService.DepositAsync(request.Token, request.Amount);
+            var result = await _financeService.DepositAsync(token, request.Amount);
             if (result)
             {
                 return Ok(new BalanceResponse { Balance = result.Value});
@@ -55,9 +57,9 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpPost("transfer")]
-        public async Task<IActionResult> Transfer(TransferRequest request)
+        public async Task<IActionResult> Transfer(TransferRequest request, [FromHeader(Name = "Authorization")] string token)
         {
-            var result = await _financeService.TransferAsync(request.Token, request.ReceiverLogin, request.Amount);
+            var result = await _financeService.TransferAsync(token, request.ReceiverLogin, request.Amount);
             if (result)
             {
                 return Ok(new BalanceResponse { Balance = result.Value });

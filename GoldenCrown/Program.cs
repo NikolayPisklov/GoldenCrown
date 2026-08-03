@@ -1,7 +1,9 @@
-using GoldenCrown.Database;
+﻿using GoldenCrown.Database;
+using GoldenCrown.Middlewares;
 using GoldenCrown.Services.FinanceServices;
 using GoldenCrown.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +16,22 @@ builder.Services.AddDbContext<GoldenCrownDbContext>(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Authorization", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Description = "Введите значение заголовка Authorization"
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Authorization", document)] = []
+    });
+});
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -31,7 +48,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseMiddleware<GoldenCrownAuthMiddleware>();
 
 app.MapControllers();
 
