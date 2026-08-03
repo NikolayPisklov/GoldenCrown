@@ -122,37 +122,19 @@ namespace GoldenCrown.Services.FinanceServices
         }
         public async Task<Result<decimal>> GetBalanceAsync(string token)
         {
-            var sessionResult = await IsSessionValid(token);
-            if (!sessionResult) 
+            var accountResult = await GetUserAccount(token);
+            if (!accountResult)
             {
-                return Result<decimal>.Failure(sessionResult.ErrorMessage!);
+                return Result<decimal>.Failure(accountResult.ErrorMessage!);
             }
-            var session = sessionResult.Value!;
-            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == session.UserId);
-            if (account is null)
-                throw new InvalidOperationException("Счёт пользователя не найден.");
+            var account = accountResult.Value!;
             return Result<decimal>.Success(account.Balance);
         }
 
-
-        private async Task<Result<Session>> IsSessionValid(string token)
-        {
-            var session = await _db.Sessions.FirstOrDefaultAsync(x => x.Token == token);
-            if (session is null)
-                return Result<Session>.Failure("Сессия не найдена.");
-            if (session.ExpiresAt < DateTime.UtcNow)
-                return Result<Session>.Failure("Время сессии истекло");
-            return Result<Session>.Success(session);
-        }
         private async Task<Result<Account>> GetUserAccount(string token)
         {
-            var sessionResult = await IsSessionValid(token);
-            if (!sessionResult)
-            {
-                return Result<Account>.Failure(sessionResult.ErrorMessage!);
-            }
-            var session = sessionResult.Value!;
-            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == session.UserId);
+            var session = _db.Sessions.FirstOrDefault(x => x.Token == token);
+            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == session!.UserId);
             if (account is null)
                 throw new InvalidOperationException("Счёт пользователя не найден.");
             return Result<Account>.Success(account);

@@ -4,9 +4,6 @@ namespace GoldenCrown.Dtos.Account
 {
     public class TransferRequest
     {
-        [Required(ErrorMessage = "Токен обязателен для заполнения.")]
-        public string Token { get; set; } = null!;
-
         [Required(ErrorMessage = "Логин получателя обязателен для заполнения.")]
         public string ReceiverLogin { get; set; } = null!;
 

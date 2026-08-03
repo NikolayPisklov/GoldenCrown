@@ -4,9 +4,6 @@ namespace GoldenCrown.Dtos.Account
 {
     public class TransactionHistoryRequest
     {
-        [Required(ErrorMessage = "Токен обязателен для заполнения.")]
-        public string Token { get; set; } = null!;
-
         public DateTime? From { get; set; }
 
         public DateTime? To { get; set; }
