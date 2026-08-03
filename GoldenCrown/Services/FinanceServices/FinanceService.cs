@@ -1,5 +1,6 @@
 ﻿using GoldenCrown.Common;
 using GoldenCrown.Database;
+using GoldenCrown.Dtos.Account;
 using GoldenCrown.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,46 @@ namespace GoldenCrown.Services.FinanceServices
         }
 
 
+        public async Task<Result<List<TransactionInfo>>> GetTransactionHistoryAsync(string token, DateTime? from, DateTime? to, int limit, int offcet)
+        {
+            var accountResult = await GetUserAccount(token);
+            if (!accountResult)
+            {
+                return Result<List<TransactionInfo>>.Failure(accountResult.ErrorMessage!);
+            }
+            if(to < from)
+            {
+                return Result<List<TransactionInfo>>.Failure("Некорректный диапазон дат.");
+            }
+            var account = accountResult.Value!;
+            var transactionQuery = _db.Transactions
+                .Where(x => (x.SenderAccountId == account.Id || x.ReceiverAccountId == account.Id));
+            if(from is null && to is not null)
+            {
+                transactionQuery = transactionQuery.Where(x => x.Date < to);
+            }
+            else if(from is not null && to is null)
+            {
+                transactionQuery = transactionQuery.Where(x => x.Date > from);
+            }
+            else if(from is not null && to is not null)
+            {
+                transactionQuery = transactionQuery.Where(x => x.Date > from && x.Date < to);
+            }
+            var transactionInfos = await transactionQuery
+                .OrderByDescending(x => x.Date)
+                .Skip(offcet)
+                .Take(limit)
+                .Select(x => new TransactionInfo() 
+                {
+                    IsSender = x.SenderAccountId == account.Id ? true : false,
+                    SenderName = x.SenderAccount.User.Name,
+                    ReceiverName = x.ReceiverAccount.User.Name,
+                    Date = x.Date,
+                    Amount = x.Amount
+                }).ToListAsync();
+            return Result<List<TransactionInfo>>.Success(transactionInfos);
+        }
         public async Task<Result<decimal>> TransferAsync(string token, string recieverLogin, decimal amount)
         {
             var accountResult = await GetUserAccount(token);

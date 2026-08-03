@@ -28,6 +28,19 @@ namespace GoldenCrown.Controllers
                 return BadRequest(result.ErrorMessage);
             }
         }
+        [HttpGet("get-history")]
+        public async Task<IActionResult> GetHistory([FromQuery]TransactionHistoryRequest request)
+        {
+            var result = await _financeService.GetTransactionHistoryAsync(request.Token, request.From, request.To, request.Limit, request.Offset);
+            if (result)
+            {
+                return Ok(new TransactionHistoryResponse() { Transactions = result.Value!});
+            }
+            else
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+        }
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
         {
