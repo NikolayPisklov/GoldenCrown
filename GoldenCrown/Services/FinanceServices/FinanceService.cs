@@ -16,18 +16,17 @@ namespace GoldenCrown.Services.FinanceServices
         }
 
 
-        public async Task<Result<List<TransactionInfo>>> GetTransactionHistoryAsync(string token, DateTime? from, DateTime? to, int limit, int offcet)
+        public async Task<Result<List<TransactionInfo>>> GetTransactionHistoryAsync(int userId, DateTime? from, DateTime? to, int limit, int offcet)
         {
-            var accountResult = await GetUserAccount(token);
-            if (!accountResult)
+            var account = _db.Accounts.FirstOrDefault(x => x.UserId == userId);
+            if (account is null)
             {
-                return Result<List<TransactionInfo>>.Failure(accountResult.ErrorMessage!);
+                return Result<List<TransactionInfo>>.Failure("Счёт пользователя не найден");
             }
             if(to < from)
             {
                 return Result<List<TransactionInfo>>.Failure("Некорректный диапазон дат.");
             }
-            var account = accountResult.Value!;
             var transactionQuery = _db.Transactions
                 .Where(x => (x.SenderAccountId == account.Id || x.ReceiverAccountId == account.Id));
             if(from is null && to is not null)
@@ -56,15 +55,14 @@ namespace GoldenCrown.Services.FinanceServices
                 }).ToListAsync();
             return Result<List<TransactionInfo>>.Success(transactionInfos);
         }
-        public async Task<Result<decimal>> TransferAsync(string token, string recieverLogin, decimal amount)
+        public async Task<Result<decimal>> TransferAsync(int userId, string recieverLogin, decimal amount)
         {
-            var accountResult = await GetUserAccount(token);
-            if (!accountResult)
+            var senderAccount = _db.Accounts.FirstOrDefault(x => x.UserId == userId);
+            if (senderAccount is null)
             {
-                return Result<decimal>.Failure(accountResult.ErrorMessage!);
+                return Result<decimal>.Failure("Счёт пользователя не найден");
             }
-            var senderAccount = accountResult.Value!;
-            if(senderAccount.Balance - amount < 0)
+            if (senderAccount.Balance - amount < 0)
             {
                 return Result<decimal>.Failure("Недостаточно средств.");
             }
@@ -93,14 +91,13 @@ namespace GoldenCrown.Services.FinanceServices
                 throw;
             }
         }
-        public async Task<Result<decimal>> DepositAsync(string token, decimal amount)
+        public async Task<Result<decimal>> DepositAsync(int userId, decimal amount)
         {
-            var accountResult = await GetUserAccount(token);
-            if (!accountResult)
+            var account = _db.Accounts.FirstOrDefault(x => x.UserId == userId);
+            if (account is null)
             {
-                return Result<decimal>.Failure(accountResult.ErrorMessage!);
+                return Result<decimal>.Failure("Счёт пользователя не найден");
             }
-            var account = accountResult.Value!;
             account.Balance += amount;
             var transaction = new Transaction()
             {
@@ -120,24 +117,14 @@ namespace GoldenCrown.Services.FinanceServices
                 throw;
             }
         }
-        public async Task<Result<decimal>> GetBalanceAsync(string token)
+        public async Task<Result<decimal>> GetBalanceAsync(int userId)
         {
-            var accountResult = await GetUserAccount(token);
-            if (!accountResult)
-            {
-                return Result<decimal>.Failure(accountResult.ErrorMessage!);
-            }
-            var account = accountResult.Value!;
-            return Result<decimal>.Success(account.Balance);
-        }
-
-        private async Task<Result<Account>> GetUserAccount(string token)
-        {
-            var session = _db.Sessions.FirstOrDefault(x => x.Token == token);
-            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == session!.UserId);
+            var account = _db.Accounts.FirstOrDefault(x => x.UserId == userId);
             if (account is null)
-                throw new InvalidOperationException("Счёт пользователя не найден.");
-            return Result<Account>.Success(account);
+            {
+                return Result<decimal>.Failure("Счёт пользователя не найден");
+            }
+            return Result<decimal>.Success(account.Balance);
         }
     }
 }

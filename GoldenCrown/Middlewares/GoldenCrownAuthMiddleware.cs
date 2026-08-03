@@ -1,7 +1,6 @@
 ﻿using GoldenCrown.Attributes;
-using GoldenCrown.Common;
 using GoldenCrown.Database;
-using GoldenCrown.Models;
+using GoldenCrown.Extentions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,7 +33,7 @@ namespace GoldenCrown.Middlewares
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return;
                 }
-                context.Items["UserId"] = session.UserId;
+                context.SetUserId(session.UserId);
             }
             await _next(context);
         }
