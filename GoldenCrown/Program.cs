@@ -1,5 +1,6 @@
 using GoldenCrown.Database;
-using GoldenCrown.Services;
+using GoldenCrown.Services.FinanceServices;
+using GoldenCrown.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IFinanceService, FinanceService>();
 
 var app = builder.Build();
 

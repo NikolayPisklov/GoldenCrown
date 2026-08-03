@@ -1,4 +1,4 @@
-﻿namespace GoldenCrown.Services
+﻿namespace GoldenCrown.Services.UserServices
 {
     public interface IAccountService
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GoldenCrown.Dtos
+namespace GoldenCrown.Dtos.UserDtos
 {
     public class RegisterRequest
     {

@@ -1,5 +1,5 @@
-﻿using GoldenCrown.Dtos;
-using GoldenCrown.Services;
+﻿using GoldenCrown.Dtos.UserDtos;
+using GoldenCrown.Services.UserServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoldenCrown.Controllers
