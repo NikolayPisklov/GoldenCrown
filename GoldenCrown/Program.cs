@@ -1,5 +1,6 @@
 ﻿using GoldenCrown.Database;
 using GoldenCrown.Middlewares;
+using GoldenCrown.Services.BackgroundServices;
 using GoldenCrown.Services.FinanceServices;
 using GoldenCrown.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFinanceService, FinanceService>();
+
+builder.Services.AddHostedService<SessionCleanupService>();
 
 var app = builder.Build();
 
