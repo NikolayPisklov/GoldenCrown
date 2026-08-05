@@ -42,6 +42,10 @@ builder.Services.AddHostedService<SessionCleanupService>();
 
 var app = builder.Build();
 
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetService<GoldenCrownDbContext>();
+db.Database.Migrate();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

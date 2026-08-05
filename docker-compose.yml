@@ -1,0 +1,28 @@
+services:
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: goldencrown-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Pass123"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+
+  api:
+    build:
+      context: ./GoldenCrown
+      dockerfile: Dockerfile
+    container_name: goldencrown-api
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__GoldenCrownDbConnection: "Server=db;Database=GoldenCrown;User Id=sa;Password=YourStrong!Pass123;TrustServerCertificate=True"
+
+volumes:
+  sql-data:
