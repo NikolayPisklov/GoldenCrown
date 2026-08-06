@@ -1,4 +1,5 @@
-﻿using GoldenCrown.Database;
+﻿using FluentValidation;
+using GoldenCrown.Database;
 using GoldenCrown.Middlewares;
 using GoldenCrown.Services.BackgroundServices;
 using GoldenCrown.Services.FinanceServices;
@@ -39,6 +40,8 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFinanceService, FinanceService>();
 
 builder.Services.AddHostedService<SessionCleanupService>();
+
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
 
 var app = builder.Build();
 
