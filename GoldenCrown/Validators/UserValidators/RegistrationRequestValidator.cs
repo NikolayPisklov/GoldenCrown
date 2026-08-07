@@ -9,7 +9,7 @@ namespace GoldenCrown.Validators.UserValidators
         {
             RuleFor(x => x.Login)
                 .NotEmpty()
-                .WithMessage("Логин обязателен для заполнения. HUI")
+                .WithMessage("Логин обязателен для заполнения.")
                 .MinimumLength(3)
                 .WithMessage("Логин должен состоять минимум из 3 символов.");
 
