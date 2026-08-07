@@ -22,7 +22,7 @@ namespace GoldenCrown.Middlewares
             if (hasAttribute) 
             {
                 var token = context.Request.Headers["Authorization"];
-                if (token.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(token))
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return;

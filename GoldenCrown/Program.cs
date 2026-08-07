@@ -3,7 +3,6 @@ using GoldenCrown.Database;
 using GoldenCrown.Middlewares;
 using GoldenCrown.Services.BackgroundServices;
 using GoldenCrown.Services.FinanceServices;
-using GoldenCrown.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
@@ -35,13 +34,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFinanceService, FinanceService>();
 
 builder.Services.AddHostedService<SessionCleanupService>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
 
 var app = builder.Build();
 

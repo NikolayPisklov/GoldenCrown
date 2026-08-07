@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using GoldenCrown.Dtos.UserDtos;
-using GoldenCrown.Services.UserServices;
+using GoldenCrown.Features.Users.Commands.LoginUser;
+using GoldenCrown.Features.Users.Commands.RegisterUser;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoldenCrown.Controllers
@@ -9,19 +11,19 @@ namespace GoldenCrown.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
-        private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IValidator<RegisterRequest> _registerValidator;
+        private readonly IValidator<LoginRequest> _loginValidator;
+        private readonly IMediator _mediator;
 
-        public UserController(IUserService userService, IValidator<RegisterRequest> registerValidator, IValidator<LoginRequest> loginValidator)
+        public UserController(IValidator<RegisterRequest> registerValidator, IValidator<LoginRequest> loginValidator, IMediator mediator)
         {
-            _userService = userService;
+            _mediator = mediator;
             _registerValidator = registerValidator;
             _loginValidator = loginValidator;
         }
 
         [HttpPost("/register")]
-        public async Task<IActionResult> Register(RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
         {
             var validationResult = _registerValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -35,7 +37,7 @@ namespace GoldenCrown.Controllers
                 };
                 return BadRequest(problemDetails);
             }
-            var result = await _userService.RegisterAsync(request.Login, request.Password, request.Name);
+            var result = await _mediator.Send(new RegisterCommand(request.Login, request.Password, request.Name), cancellationToken);
             if (result) 
             {
                 return Ok();
@@ -46,7 +48,7 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpPost("/login")]
-        public async Task<IActionResult> Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
         {
             var validationResult = _loginValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -60,7 +62,7 @@ namespace GoldenCrown.Controllers
                 };
                 return BadRequest(problemDetails);
             }
-            var result = await _userService.LoginAsync(request.Login, request.Password);
+            var result = await _mediator.Send(new LoginCommand(request.Login, request.Password), cancellationToken);
             if (result)
             {
                 return Ok(new LoginResponse { Token = result.Value! });
