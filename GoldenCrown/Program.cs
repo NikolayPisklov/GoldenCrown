@@ -2,7 +2,6 @@
 using GoldenCrown.Database;
 using GoldenCrown.Middlewares;
 using GoldenCrown.Services.BackgroundServices;
-using GoldenCrown.Services.FinanceServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
@@ -33,8 +32,6 @@ builder.Services.AddSwaggerGen(options =>
         [new OpenApiSecuritySchemeReference("Authorization", document)] = []
     });
 });
-
-builder.Services.AddScoped<IFinanceService, FinanceService>();
 
 builder.Services.AddHostedService<SessionCleanupService>();
 

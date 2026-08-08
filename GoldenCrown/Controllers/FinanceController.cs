@@ -1,8 +1,12 @@
-﻿using FluentValidation;
+using FluentValidation;
 using GoldenCrown.Attributes;
 using GoldenCrown.Dtos.Account;
 using GoldenCrown.Extentions;
-using GoldenCrown.Services.FinanceServices;
+using GoldenCrown.Features.Finance.Commands.Deposit;
+using GoldenCrown.Features.Finance.Commands.Transfer;
+using GoldenCrown.Features.Finance.Queries.GetBalance;
+using GoldenCrown.Features.Finance.Queries.GetTransactionHistory;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoldenCrown.Controllers
@@ -12,24 +16,24 @@ namespace GoldenCrown.Controllers
     [GoldenCrownAuth]
     public class FinanceController : ControllerBase
     {
-        private readonly IFinanceService _financeService;
+        private readonly IMediator _mediator;
         private readonly IValidator<TransferRequest> _transferValidator;
         private readonly IValidator<TransactionHistoryRequest> _historyValidator;
         private readonly IValidator<DepositRequest> _depositValidator;
 
-        public FinanceController(IFinanceService financeService, IValidator<TransactionHistoryRequest> historyValidator, IValidator<DepositRequest> depositValidator, IValidator<TransferRequest> transferValidator)
+        public FinanceController(IMediator mediator, IValidator<TransactionHistoryRequest> historyValidator, IValidator<DepositRequest> depositValidator, IValidator<TransferRequest> transferValidator)
         {
-            _financeService = financeService;
+            _mediator = mediator;
             _historyValidator = historyValidator;
             _depositValidator = depositValidator;
             _transferValidator = transferValidator;
         }
 
         [HttpGet("balance")]
-        public async Task<IActionResult> GetBalance()
+        public async Task<IActionResult> GetBalance(CancellationToken cancellationToken)
         {
             var userId = HttpContext.GetUserId();
-            var result = await _financeService.GetBalanceAsync(userId);
+            var result = await _mediator.Send(new GetBalanceQuery(userId), cancellationToken);
             if (result)
             {
                 return Ok(new BalanceResponse { Balance = result.Value });
@@ -40,7 +44,7 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpGet("get-history")]
-        public async Task<IActionResult> GetHistory([FromQuery]TransactionHistoryRequest request)
+        public async Task<IActionResult> GetHistory([FromQuery]TransactionHistoryRequest request, CancellationToken cancellationToken)
         {
             var validationResult = _historyValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -55,7 +59,7 @@ namespace GoldenCrown.Controllers
                 return BadRequest(problemDetails);
             }
             var userId = HttpContext.GetUserId();
-            var result = await _financeService.GetTransactionHistoryAsync(userId, request.From, request.To, request.Limit, request.Offset);
+            var result = await _mediator.Send(new GetTransactionHistoryQuery(userId, request.From, request.To, request.Limit, request.Offset), cancellationToken);
             if (result)
             {
                 return Ok(new TransactionHistoryResponse() { Transactions = result.Value!});
@@ -66,7 +70,7 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpPost("deposit")]
-        public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
+        public async Task<IActionResult> Deposit([FromBody] DepositRequest request, CancellationToken cancellationToken)
         {
             var validationResult = _depositValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -81,7 +85,7 @@ namespace GoldenCrown.Controllers
                 return BadRequest(problemDetails);
             }
             var userId = HttpContext.GetUserId();
-            var result = await _financeService.DepositAsync(userId, request.Amount);
+            var result = await _mediator.Send(new DepositCommand(userId, request.Amount), cancellationToken);
             if (result)
             {
                 return Ok(new BalanceResponse { Balance = result.Value});
@@ -92,7 +96,7 @@ namespace GoldenCrown.Controllers
             }
         }
         [HttpPost("transfer")]
-        public async Task<IActionResult> Transfer(TransferRequest request)
+        public async Task<IActionResult> Transfer(TransferRequest request, CancellationToken cancellationToken)
         {
             var validationResult = _transferValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -107,7 +111,7 @@ namespace GoldenCrown.Controllers
                 return BadRequest(problemDetails);
             }
             var userId = HttpContext.GetUserId();
-            var result = await _financeService.TransferAsync(userId, request.ReceiverLogin, request.Amount);
+            var result = await _mediator.Send(new TransferCommand(userId, request.ReceiverLogin, request.Amount), cancellationToken);
             if (result)
             {
                 return Ok(new BalanceResponse { Balance = result.Value });
