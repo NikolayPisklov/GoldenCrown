@@ -24,8 +24,11 @@ namespace GoldenCrown.Database
             var accountEntity = modelBuilder.Entity<Account>();
             var transactionEntity = modelBuilder.Entity<Transaction>();
             var sessionEntity = modelBuilder.Entity<Session>();
+            var currencyEntity = modelBuilder.Entity<Currency>();
 
             userEntity.HasIndex(u => u.Login)
+                .IsUnique();
+            currencyEntity.HasIndex(u => u.Name)
                 .IsUnique();
 
             accountEntity.Property(x => x.Balance)
@@ -68,46 +71,38 @@ namespace GoldenCrown.Database
                 .HasForeignKey<Account>(s => s.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            SeedUserData(userEntity);
+            accountEntity.HasOne(a => a.Currency)
+                .WithMany(c => c.Accounts)
+                .HasForeignKey(a => a.CurrencyId)
+                .OnDelete(DeleteBehavior.NoAction);
+            accountEntity.Property(a => a.CurrencyId)
+                .HasDefaultValue(1);
+
+            SeedUserData(currencyEntity);
         }
 
-        private void SeedUserData(EntityTypeBuilder<User> userEntity)
+        private void SeedUserData(EntityTypeBuilder<Currency> currencyEntity)
         {
-            userEntity.HasData(
-                new User
+            currencyEntity.HasData(
+                new Currency
                 {
                     Id = 1,
-                    Login = "admin",
-                    Name = "Administrator",
-                    Password = "admin123"
+                    Name = "RU",
                 },
-                new User
+                new Currency
                 {
                     Id = 2,
-                    Login = "ivan",
-                    Name = "Ivan Petrov",
-                    Password = "ivan123"
+                    Name = "USD",
                 },
-                new User
+                new Currency
                 {
                     Id = 3,
-                    Login = "maria",
-                    Name = "Maria Smirnova",
-                    Password = "maria123"
+                    Name = "EUR",
                 },
-                new User
+                new Currency
                 {
                     Id = 4,
-                    Login = "alex",
-                    Name = "Alex Kuznetsov",
-                    Password = "alex123"
-                },
-                new User
-                {
-                    Id = 5,
-                    Login = "elena",
-                    Name = "Elena Sokolova",
-                    Password = "elena123"
+                    Name = "JPY",
                 }
             );
         }
