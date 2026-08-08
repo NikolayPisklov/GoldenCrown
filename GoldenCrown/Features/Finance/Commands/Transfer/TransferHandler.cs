@@ -1,3 +1,4 @@
+using System.Data;
 using GoldenCrown.Common;
 using GoldenCrown.Database;
 using GoldenCrown.Models;
@@ -17,19 +18,25 @@ namespace GoldenCrown.Features.Finance.Commands.Transfer
 
         public async Task<Result<decimal>> Handle(TransferCommand request, CancellationToken cancellationToken)
         {
+            await using var dbTransaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+
             var senderAccount = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
             if (senderAccount is null)
             {
                 return Result<decimal>.Failure("Счёт пользователя не найден");
             }
-            if (senderAccount.Balance - request.Amount < 0)
-            {
-                return Result<decimal>.Failure("Недостаточно средств.");
-            }
             var receiverAccount = await _db.Accounts.FirstOrDefaultAsync(x => x.User.Login == request.ReceiverLogin, cancellationToken);
             if (receiverAccount is null)
             {
                 return Result<decimal>.Failure("Счёт получателя не найден.");
+            }
+            if (senderAccount.Id == receiverAccount.Id)
+            {
+                return Result<decimal>.Failure("Нельзя перевести средства самому себе.");
+            }
+            if (senderAccount.Balance - request.Amount < 0)
+            {
+                return Result<decimal>.Failure("Недостаточно средств.");
             }
             senderAccount.Balance -= request.Amount;
             receiverAccount.Balance += request.Amount;
@@ -42,6 +49,7 @@ namespace GoldenCrown.Features.Finance.Commands.Transfer
             };
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
+            await dbTransaction.CommitAsync(cancellationToken);
             return Result<decimal>.Success(senderAccount.Balance);
         }
     }
