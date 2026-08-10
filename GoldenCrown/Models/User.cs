@@ -8,6 +8,6 @@
         public string Password { get; set; } = null!;
 
         public Session Session { get; set; } = null!;
-        public Account Account { get; set; } = null!;
+        public ICollection<Account> Accounts { get; set; } = null!;
     }
 }

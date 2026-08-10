@@ -8,13 +8,14 @@ namespace GoldenCrown.Database
     {
         public GoldenCrownDbContext(DbContextOptions<GoldenCrownDbContext> options) : base(options)
         {
-  
+
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,21 +29,26 @@ namespace GoldenCrown.Database
 
             userEntity.HasIndex(u => u.Login)
                 .IsUnique();
+            userEntity.HasMany(u => u.Accounts)
+                .WithOne(a => a.User)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             currencyEntity.HasIndex(u => u.Name)
                 .IsUnique();
 
+            accountEntity.HasIndex(a => new { a.UserId, a.CurrencyId })
+                .IsUnique();
             accountEntity.Property(x => x.Balance)
                 .HasPrecision(18, 2);
-
-            transactionEntity.Property(x => x.Amount)
-                .HasPrecision(18, 2);
-
             accountEntity
                 .ToTable(t => t.HasCheckConstraint("CK_Account_Balance_NonNegative", "[Balance] >= 0"));
 
+            transactionEntity.Property(x => x.Amount)
+                .HasPrecision(18, 2);
+            
             transactionEntity
                 .ToTable(t => t.HasCheckConstraint("CK_Transaction_Amount_GreaterThanZero", "[Amount] > 0"));
-
             sessionEntity
                 .HasKey(s => s.UserId);
 
@@ -65,12 +71,6 @@ namespace GoldenCrown.Database
                 .HasForeignKey<Session>(s => s.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            accountEntity
-                .HasOne(s => s.User)
-                .WithOne(u => u.Account)
-                .HasForeignKey<Account>(s => s.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             accountEntity.HasOne(a => a.Currency)
                 .WithMany(c => c.Accounts)
                 .HasForeignKey(a => a.CurrencyId)
@@ -87,7 +87,7 @@ namespace GoldenCrown.Database
                 new Currency
                 {
                     Id = 1,
-                    Name = "RU",
+                    Name = "RUB",
                 },
                 new Currency
                 {

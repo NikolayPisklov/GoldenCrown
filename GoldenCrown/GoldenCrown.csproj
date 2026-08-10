@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Finance\Commands\" />
     <Folder Include="Features\Finance\Queries\" />
   </ItemGroup>
 

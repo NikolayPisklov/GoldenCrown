@@ -17,10 +17,10 @@ namespace GoldenCrown.Features.Finance.Commands.Deposit
 
         public async Task<Result<decimal>> Handle(DepositCommand request, CancellationToken cancellationToken)
         {
-            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
+            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == request.UserId && x.CurrencyId == request.CurrencyId, cancellationToken);
             if (account is null)
             {
-                return Result<decimal>.Failure("Счёт пользователя не найден");
+                return Result<decimal>.Failure("Счёт пользователя не найден.");
             }
             account.Balance += request.Amount;
             var transaction = new Transaction()

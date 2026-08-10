@@ -25,14 +25,10 @@ namespace GoldenCrown.Features.Users.Commands.RegisterUser
             {
                 Login = request.Login,
                 Password = request.Password,
-                Name = request.Name,
-
-                Account = new Account()
-                {
-                    Balance = 0
-                }
+                Name = request.Name
             };
             _db.Users.Add(user);
+            _db.Accounts.Add(new Account { User = user });
             await _db.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }

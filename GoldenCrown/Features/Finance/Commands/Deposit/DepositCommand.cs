@@ -6,6 +6,7 @@ namespace GoldenCrown.Features.Finance.Commands.Deposit
     public record DepositCommand
     (
         int UserId,
-        decimal Amount
+        decimal Amount,
+        int CurrencyId
     ) : IRequest<Result<decimal>>;
 }

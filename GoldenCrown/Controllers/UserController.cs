@@ -69,7 +69,7 @@ namespace GoldenCrown.Controllers
             }
             else
             {
-                return NotFound();
+                return Unauthorized(result.ErrorMessage);
             }
         }
 
