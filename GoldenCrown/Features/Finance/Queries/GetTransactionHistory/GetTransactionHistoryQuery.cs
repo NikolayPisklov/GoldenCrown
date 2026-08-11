@@ -9,6 +9,7 @@ namespace GoldenCrown.Features.Finance.Queries.GetTransactionHistory
         int UserId,
         DateTime? From,
         DateTime? To,
+        int? CurrencyId,
         int Limit,
         int Offset
     ) : IRequest<Result<List<TransactionInfo>>>;

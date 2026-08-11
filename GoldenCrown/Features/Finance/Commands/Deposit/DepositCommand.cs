@@ -1,4 +1,5 @@
 using GoldenCrown.Common;
+using GoldenCrown.Dtos.Account;
 using MediatR;
 
 namespace GoldenCrown.Features.Finance.Commands.Deposit
@@ -8,5 +9,5 @@ namespace GoldenCrown.Features.Finance.Commands.Deposit
         int UserId,
         decimal Amount,
         int CurrencyId
-    ) : IRequest<Result<decimal>>;
+    ) : IRequest<Result<BalanceResponse>>;
 }

@@ -1,4 +1,5 @@
 using GoldenCrown.Common;
+using GoldenCrown.Dtos.Account;
 using MediatR;
 
 namespace GoldenCrown.Features.Finance.Commands.Transfer
@@ -7,6 +8,7 @@ namespace GoldenCrown.Features.Finance.Commands.Transfer
     (
         int UserId,
         string ReceiverLogin,
-        decimal Amount
-    ) : IRequest<Result<decimal>>;
+        decimal Amount,
+        int CurrencyId
+    ) : IRequest<Result<BalanceResponse>>;
 }

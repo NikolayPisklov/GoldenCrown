@@ -17,8 +17,13 @@ namespace GoldenCrown.Features.Finance.Queries.GetTransactionHistory
 
         public async Task<Result<List<TransactionInfo>>> Handle(GetTransactionHistoryQuery request, CancellationToken cancellationToken)
         {
-            var account = await _db.Accounts.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
-            if (account is null)
+            var accountsQuery = _db.Accounts.Where(x => x.UserId == request.UserId);
+            if (request.CurrencyId is not null)
+            {
+                accountsQuery = accountsQuery.Where(x => x.CurrencyId == request.CurrencyId);
+            }
+            var accountIds = await accountsQuery.Select(x => x.Id).ToListAsync(cancellationToken);
+            if (accountIds.Count == 0)
             {
                 return Result<List<TransactionInfo>>.Failure("Счёт пользователя не найден");
             }
@@ -27,7 +32,7 @@ namespace GoldenCrown.Features.Finance.Queries.GetTransactionHistory
                 return Result<List<TransactionInfo>>.Failure("Некорректный диапазон дат.");
             }
             var transactionQuery = _db.Transactions
-                .Where(x => (x.SenderAccountId == account.Id || x.ReceiverAccountId == account.Id));
+                .Where(x => (accountIds.Contains(x.SenderAccountId) || accountIds.Contains(x.ReceiverAccountId)));
             if (request.From is null && request.To is not null)
             {
                 transactionQuery = transactionQuery.Where(x => x.Date < request.To);
@@ -46,9 +51,10 @@ namespace GoldenCrown.Features.Finance.Queries.GetTransactionHistory
                 .Take(request.Limit)
                 .Select(x => new TransactionInfo()
                 {
-                    IsSender = x.SenderAccountId == account.Id ? true : false,
+                    IsSender = accountIds.Contains(x.SenderAccountId),
                     SenderName = x.SenderAccount.User.Name,
                     ReceiverName = x.ReceiverAccount.User.Name,
+                    AccountCurrency = x.SenderAccount.Currency.Name,
                     Date = x.Date,
                     Amount = x.Amount
                 }).ToListAsync(cancellationToken);

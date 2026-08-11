@@ -39,7 +39,7 @@ namespace GoldenCrown.Controllers
             var result = await _mediator.Send(new GetBalanceQuery(userId), cancellationToken);
             if (result)
             {
-                return Ok(new BalanceResponse { Balance = result.Value });
+                return Ok(result.Value);
             }
             else
             {
@@ -62,7 +62,7 @@ namespace GoldenCrown.Controllers
                 return BadRequest(problemDetails);
             }
             var userId = HttpContext.GetUserId();
-            var result = await _mediator.Send(new GetTransactionHistoryQuery(userId, request.From, request.To, request.Limit, request.Offset), cancellationToken);
+            var result = await _mediator.Send(new GetTransactionHistoryQuery(userId, request.From, request.To, request.CurrencyId, request.Limit, request.Offset), cancellationToken);
             if (result)
             {
                 return Ok(new TransactionHistoryResponse() { Transactions = result.Value!});
@@ -91,7 +91,7 @@ namespace GoldenCrown.Controllers
             var result = await _mediator.Send(new DepositCommand(userId, request.Amount, request.CurrencyId), cancellationToken);
             if (result)
             {
-                return Ok(new BalanceResponse { Balance = result.Value});
+                return Ok(result.Value);
             }
             else
             {
@@ -114,10 +114,10 @@ namespace GoldenCrown.Controllers
                 return BadRequest(problemDetails);
             }
             var userId = HttpContext.GetUserId();
-            var result = await _mediator.Send(new TransferCommand(userId, request.ReceiverLogin, request.Amount), cancellationToken);
+            var result = await _mediator.Send(new TransferCommand(userId, request.ReceiverLogin, request.Amount, request.CurrencyId), cancellationToken);
             if (result)
             {
-                return Ok(new BalanceResponse { Balance = result.Value });
+                return Ok(result.Value);
             }
             else
             {
