@@ -1,16 +1,16 @@
 using FluentValidation;
-using GoldenCrown.Attributes;
-using GoldenCrown.Dtos.Account;
-using GoldenCrown.Extentions;
-using GoldenCrown.Features.Finance.Commands.CreateAccount;
-using GoldenCrown.Features.Finance.Commands.Deposit;
-using GoldenCrown.Features.Finance.Commands.Transfer;
-using GoldenCrown.Features.Finance.Queries.GetBalance;
-using GoldenCrown.Features.Finance.Queries.GetTransactionHistory;
+using GoldenCrownApi.Attributes;
+using GoldenCrownApi.Dtos.Account;
+using GoldenCrownApi.Extentions;
+using GoldenCrownApi.Features.Finance.Commands.CreateAccount;
+using GoldenCrownApi.Features.Finance.Commands.Deposit;
+using GoldenCrownApi.Features.Finance.Commands.Transfer;
+using GoldenCrownApi.Features.Finance.Queries.GetBalance;
+using GoldenCrownApi.Features.Finance.Queries.GetTransactionHistory;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoldenCrown.Controllers
+namespace GoldenCrownApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

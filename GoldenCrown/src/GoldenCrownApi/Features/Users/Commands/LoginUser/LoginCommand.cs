@@ -1,7 +1,7 @@
-﻿using GoldenCrown.Common;
+﻿using GoldenCrownApi.Common;
 using MediatR;
 
-namespace GoldenCrown.Features.Users.Commands.LoginUser
+namespace GoldenCrownApi.Features.Users.Commands.LoginUser
 {
     public record LoginCommand
     (

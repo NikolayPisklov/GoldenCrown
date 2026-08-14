@@ -1,4 +1,4 @@
-﻿namespace GoldenCrown.Dtos.Account
+﻿namespace GoldenCrownApi.Dtos.Account
 {
     public class TransactionInfo
     {

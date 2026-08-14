@@ -1,10 +1,9 @@
-﻿using GoldenCrown.Attributes;
-using GoldenCrown.Database;
-using GoldenCrown.Extentions;
+﻿using GoldenCrownApi.Attributes;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Extentions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
-namespace GoldenCrown.Middlewares
+namespace GoldenCrownApi.Middlewares
 {
     public class GoldenCrownAuthMiddleware
     {

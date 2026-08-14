@@ -1,4 +1,4 @@
-﻿namespace GoldenCrown.Models
+﻿namespace GoldenCrownApi.Models
 {
     public class User
     {

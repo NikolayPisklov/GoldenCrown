@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using GoldenCrown.Dtos.UserDtos;
+using GoldenCrownApi.Dtos.UserDtos;
 
-namespace GoldenCrown.Validators.UserValidators
+namespace GoldenCrownApi.Validators.UserValidators
 {
     public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {

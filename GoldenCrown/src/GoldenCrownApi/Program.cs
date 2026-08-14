@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
 using GoldenCrown.Database;
-using GoldenCrown.Middlewares;
-using GoldenCrown.Services.BackgroundServices;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Middlewares;
+using GoldenCrownApi.Services.BackgroundServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 

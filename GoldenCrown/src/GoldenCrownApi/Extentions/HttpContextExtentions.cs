@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace GoldenCrown.Extentions
+﻿namespace GoldenCrownApi.Extentions
 {
     public static class HttpContextExtentions
     {

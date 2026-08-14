@@ -1,8 +1,8 @@
-using GoldenCrown.Common;
-using GoldenCrown.Dtos.Account;
+using GoldenCrownApi.Common;
+using GoldenCrownApi.Dtos.Account;
 using MediatR;
 
-namespace GoldenCrown.Features.Finance.Queries.GetBalance
+namespace GoldenCrownApi.Features.Finance.Queries.GetBalance
 {
     public record GetBalanceQuery
     (

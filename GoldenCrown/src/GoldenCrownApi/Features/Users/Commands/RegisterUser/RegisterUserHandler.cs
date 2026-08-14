@@ -1,10 +1,10 @@
-﻿using GoldenCrown.Common;
-using GoldenCrown.Database;
-using GoldenCrown.Models;
+﻿using GoldenCrownApi.Common;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Features.Users.Commands.RegisterUser
+namespace GoldenCrownApi.Features.Users.Commands.RegisterUser
 {
     public class RegisterUserHandler : IRequestHandler<RegisterCommand, Result>
     {

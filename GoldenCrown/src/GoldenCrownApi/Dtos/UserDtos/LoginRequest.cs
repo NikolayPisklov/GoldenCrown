@@ -1,4 +1,4 @@
-﻿namespace GoldenCrown.Dtos.UserDtos
+﻿namespace GoldenCrownApi.Dtos.UserDtos
 {
     public class LoginRequest
     {

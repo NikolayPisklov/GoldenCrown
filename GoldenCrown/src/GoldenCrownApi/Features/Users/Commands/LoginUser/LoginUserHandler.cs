@@ -1,10 +1,10 @@
-﻿using GoldenCrown.Common;
-using GoldenCrown.Database;
-using GoldenCrown.Models;
+﻿using GoldenCrownApi.Common;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Features.Users.Commands.LoginUser
+namespace GoldenCrownApi.Features.Users.Commands.LoginUser
 {
     public class LoginUserHandler : IRequestHandler<LoginCommand, Result<string>>
     {

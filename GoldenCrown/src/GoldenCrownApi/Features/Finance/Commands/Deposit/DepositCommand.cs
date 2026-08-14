@@ -1,8 +1,8 @@
-using GoldenCrown.Common;
-using GoldenCrown.Dtos.Account;
+using GoldenCrownApi.Common;
+using GoldenCrownApi.Dtos.Account;
 using MediatR;
 
-namespace GoldenCrown.Features.Finance.Commands.Deposit
+namespace GoldenCrownApi.Features.Finance.Commands.Deposit
 {
     public record DepositCommand
     (

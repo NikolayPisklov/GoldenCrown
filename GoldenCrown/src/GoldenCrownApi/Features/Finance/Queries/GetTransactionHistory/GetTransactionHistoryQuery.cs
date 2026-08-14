@@ -1,8 +1,8 @@
-using GoldenCrown.Common;
-using GoldenCrown.Dtos.Account;
+using GoldenCrownApi.Common;
+using GoldenCrownApi.Dtos.Account;
 using MediatR;
 
-namespace GoldenCrown.Features.Finance.Queries.GetTransactionHistory
+namespace GoldenCrownApi.Features.Finance.Queries.GetTransactionHistory
 {
     public record GetTransactionHistoryQuery
     (

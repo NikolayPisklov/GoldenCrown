@@ -1,10 +1,10 @@
-using GoldenCrown.Common;
-using GoldenCrown.Database;
-using GoldenCrown.Dtos.Account;
+using GoldenCrownApi.Common;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Dtos.Account;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Features.Finance.Queries.GetBalance
+namespace GoldenCrownApi.Features.Finance.Queries.GetBalance
 {
     public class GetBalanceHandler : IRequestHandler<GetBalanceQuery, Result<List<BalanceResponse>>>
     {

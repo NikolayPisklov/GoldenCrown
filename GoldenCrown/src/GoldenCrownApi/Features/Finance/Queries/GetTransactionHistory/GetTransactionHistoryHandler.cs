@@ -1,10 +1,10 @@
-using GoldenCrown.Common;
-using GoldenCrown.Database;
-using GoldenCrown.Dtos.Account;
+using GoldenCrownApi.Common;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Dtos.Account;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Features.Finance.Queries.GetTransactionHistory
+namespace GoldenCrownApi.Features.Finance.Queries.GetTransactionHistory
 {
     public class GetTransactionHistoryHandler : IRequestHandler<GetTransactionHistoryQuery, Result<List<TransactionInfo>>>
     {

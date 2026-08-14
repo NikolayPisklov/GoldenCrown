@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using GoldenCrown.Dtos.Account;
+using GoldenCrownApi.Dtos.Account;
 
-namespace GoldenCrown.Validators.FinanceValidators
+namespace GoldenCrownApi.Validators.FinanceValidators
 {
     public class TransactionHistoryRequestValidator : AbstractValidator<TransactionHistoryRequest>
     {

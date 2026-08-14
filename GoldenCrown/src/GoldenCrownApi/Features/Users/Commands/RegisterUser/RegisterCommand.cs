@@ -1,7 +1,7 @@
-﻿using GoldenCrown.Common;
+﻿using GoldenCrownApi.Common;
 using MediatR;
 
-namespace GoldenCrown.Features.Users.Commands.RegisterUser
+namespace GoldenCrownApi.Features.Users.Commands.RegisterUser
 {
     public record RegisterCommand(
         string Login,

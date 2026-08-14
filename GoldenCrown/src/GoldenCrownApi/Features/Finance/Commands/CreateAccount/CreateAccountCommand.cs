@@ -1,7 +1,7 @@
-﻿using GoldenCrown.Common;
+﻿using GoldenCrownApi.Common;
 using MediatR;
 
-namespace GoldenCrown.Features.Finance.Commands.CreateAccount
+namespace GoldenCrownApi.Features.Finance.Commands.CreateAccount
 {
     public record CreateAccountCommand
     (

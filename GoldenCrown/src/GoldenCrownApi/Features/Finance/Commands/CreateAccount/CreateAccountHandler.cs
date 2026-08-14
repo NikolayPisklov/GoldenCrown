@@ -1,10 +1,10 @@
-﻿using GoldenCrown.Common;
-using GoldenCrown.Database;
-using GoldenCrown.Models;
+﻿using GoldenCrownApi.Common;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Features.Finance.Commands.CreateAccount
+namespace GoldenCrownApi.Features.Finance.Commands.CreateAccount
 {
     public class CreateAccountHandler : IRequestHandler<CreateAccountCommand, Result>
     {

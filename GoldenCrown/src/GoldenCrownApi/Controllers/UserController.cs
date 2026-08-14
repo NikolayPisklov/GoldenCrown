@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using GoldenCrown.Dtos.UserDtos;
-using GoldenCrown.Features.Users.Commands.LoginUser;
-using GoldenCrown.Features.Users.Commands.RegisterUser;
+using GoldenCrownApi.Dtos.UserDtos;
+using GoldenCrownApi.Features.Users.Commands.LoginUser;
+using GoldenCrownApi.Features.Users.Commands.RegisterUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoldenCrown.Controllers
+namespace GoldenCrownApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

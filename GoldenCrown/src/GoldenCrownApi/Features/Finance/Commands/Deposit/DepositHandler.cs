@@ -1,12 +1,12 @@
 using System.Data;
-using GoldenCrown.Common;
-using GoldenCrown.Database;
-using GoldenCrown.Dtos.Account;
-using GoldenCrown.Models;
+using GoldenCrownApi.Common;
+using GoldenCrownApi.Database;
+using GoldenCrownApi.Dtos.Account;
+using GoldenCrownApi.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoldenCrown.Features.Finance.Commands.Deposit
+namespace GoldenCrownApi.Features.Finance.Commands.Deposit
 {
     public class DepositHandler : IRequestHandler<DepositCommand, Result<BalanceResponse>>
     {

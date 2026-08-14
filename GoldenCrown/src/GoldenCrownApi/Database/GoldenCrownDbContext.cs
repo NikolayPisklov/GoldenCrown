@@ -1,8 +1,8 @@
-﻿using GoldenCrown.Models;
+﻿using GoldenCrownApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace GoldenCrown.Database
+namespace GoldenCrownApi.Database
 {
     public class GoldenCrownDbContext : DbContext
     {
