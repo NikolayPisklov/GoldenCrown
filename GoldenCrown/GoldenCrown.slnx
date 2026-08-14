@@ -1,3 +1,3 @@
 <Solution>
-  <Project Path="GoldenCrown.csproj" />
+  <Project Path="src/GoldenCrownApi/GoldenCrownApi.csproj" />
 </Solution>
