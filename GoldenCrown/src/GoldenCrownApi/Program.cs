@@ -2,6 +2,7 @@
 using GoldenCrown.Database;
 using GoldenCrownApi.Database;
 using GoldenCrownApi.Middlewares;
+using GoldenCrownApi.RabbitMQ;
 using GoldenCrownApi.Services.BackgroundServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -40,7 +41,9 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInte
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
-
+builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMq"));
+builder.Services.AddSingleton<IRabbitMqConnectionManager, RabbitMqConnectionManager>();
+builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();

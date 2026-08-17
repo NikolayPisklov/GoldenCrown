@@ -3,6 +3,7 @@ using GoldenCrownApi.Common;
 using GoldenCrownApi.Database;
 using GoldenCrownApi.Dtos.Account;
 using GoldenCrownApi.Models;
+using GoldenCrownApi.RabbitMQ;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace GoldenCrownApi.Features.Finance.Commands.Deposit
     public class DepositHandler : IRequestHandler<DepositCommand, Result<BalanceResponse>>
     {
         private readonly GoldenCrownDbContext _db;
+        private readonly IMessagePublisher _messagePublisher;
 
-        public DepositHandler(GoldenCrownDbContext db)
+        public DepositHandler(GoldenCrownDbContext db, IMessagePublisher messagePublisher)
         {
             _db = db;
+            this._messagePublisher = messagePublisher;
         }
 
         public async Task<Result<BalanceResponse>> Handle(DepositCommand request, CancellationToken cancellationToken)
@@ -39,6 +42,11 @@ namespace GoldenCrownApi.Features.Finance.Commands.Deposit
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
             await dbTransaction.CommitAsync(cancellationToken);
+
+            await _messagePublisher.PublishAsync(new TransactionDepositEvent(
+                request.UserId, 
+                request.Amount, 
+                account.Currency.Name), cancellationToken);
             return Result<BalanceResponse>.Success(new BalanceResponse()
             {
                 Balance = account.Balance,

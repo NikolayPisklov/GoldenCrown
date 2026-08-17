@@ -35,26 +35,26 @@ services:
       retries: 10
       start_period: 20s
 
-  api:
-    build:
-      context: ./GoldenCrown
-      dockerfile: Dockerfile
-      args:
-        BUILD_CONFIGURATION: Debug
-    container_name: goldencrown-api
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    environment:
-      ASPNETCORE_HTTP_PORTS: "8080"
-      ConnectionStrings__GoldenCrownDbConnection: "Server=db;Database=GoldenCrown;User Id=sa;Password=YourStrong!Pass123;TrustServerCertificate=True"
-      RabbitMQ__Host: "rabbitmq"
-      RabbitMQ__Username: "guest"
-      RabbitMQ__Password: "guest"
+#  api:
+#    build:
+#      context: ./GoldenCrown/src/GoldenCrownApi
+#      dockerfile: Dockerfile
+#      args:
+#        BUILD_CONFIGURATION: Debug
+#    container_name: goldencrown-api
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      ASPNETCORE_HTTP_PORTS: "8080"
+#      ConnectionStrings__GoldenCrownDbConnection: "Server=db;Database=GoldenCrown;User Id=sa;Password=YourStrong!Pass123;TrustServerCertificate=True"
+#      RabbitMQ__Host: "rabbitmq"
+#      RabbitMQ__Username: "guest"
+#      RabbitMQ__Password: "guest"
 
 volumes:
   sql-data:

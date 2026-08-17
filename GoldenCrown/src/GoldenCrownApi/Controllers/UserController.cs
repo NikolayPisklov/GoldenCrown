@@ -1,9 +1,11 @@
-﻿using FluentValidation;
+﻿using System.Text;
+using FluentValidation;
 using GoldenCrownApi.Dtos.UserDtos;
 using GoldenCrownApi.Features.Users.Commands.LoginUser;
 using GoldenCrownApi.Features.Users.Commands.RegisterUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RabbitMQ.Client;
 
 namespace GoldenCrownApi.Controllers
 {
@@ -15,7 +17,8 @@ namespace GoldenCrownApi.Controllers
         private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IMediator _mediator;
 
-        public UserController(IValidator<RegisterRequest> registerValidator, IValidator<LoginRequest> loginValidator, IMediator mediator)
+        public UserController(IValidator<RegisterRequest> registerValidator, IValidator<LoginRequest> loginValidator,
+            IMediator mediator)
         {
             _mediator = mediator;
             _registerValidator = registerValidator;
@@ -72,6 +75,5 @@ namespace GoldenCrownApi.Controllers
                 return Unauthorized(result.ErrorMessage);
             }
         }
-
     }
 }
