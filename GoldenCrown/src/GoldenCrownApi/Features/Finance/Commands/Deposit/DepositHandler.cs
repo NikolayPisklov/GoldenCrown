@@ -1,8 +1,9 @@
 using System.Data;
+using GoldenCrown.Domain.Common;
+using GoldenCrown.Domain.Entities;
 using GoldenCrownApi.Common;
 using GoldenCrownApi.Database;
 using GoldenCrownApi.Dtos.Account;
-using GoldenCrownApi.Models;
 using GoldenCrownApi.RabbitMQ;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

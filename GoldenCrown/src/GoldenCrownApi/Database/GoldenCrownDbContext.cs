@@ -1,4 +1,4 @@
-﻿using GoldenCrownApi.Models;
+﻿using GoldenCrown.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

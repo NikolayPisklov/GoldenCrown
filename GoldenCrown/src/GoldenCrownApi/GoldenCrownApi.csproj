@@ -32,4 +32,8 @@
     <Folder Include="Features\Finance\Queries\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GoldenCrown.Domain\GoldenCrown.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

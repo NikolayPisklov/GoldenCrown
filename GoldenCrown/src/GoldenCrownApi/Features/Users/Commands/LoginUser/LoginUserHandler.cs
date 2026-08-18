@@ -1,6 +1,6 @@
-﻿using GoldenCrownApi.Common;
+﻿using GoldenCrown.Domain.Common;
+using GoldenCrown.Domain.Entities;
 using GoldenCrownApi.Database;
-using GoldenCrownApi.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,4 +1,4 @@
-﻿namespace GoldenCrownApi.Common
+﻿namespace GoldenCrown.Domain.Common
 {
     public class Result<T> : Result
     {

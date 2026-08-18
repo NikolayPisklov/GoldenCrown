@@ -1,4 +1,4 @@
-using GoldenCrownApi.Common;
+using GoldenCrown.Domain.Common;
 using GoldenCrownApi.Dtos.Account;
 using MediatR;
 

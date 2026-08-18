@@ -1,4 +1,4 @@
-﻿using GoldenCrownApi.Common;
+﻿using GoldenCrown.Domain.Common;
 using MediatR;
 
 namespace GoldenCrownApi.Features.Users.Commands.LoginUser

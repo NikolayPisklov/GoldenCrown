@@ -1,4 +1,4 @@
-﻿namespace GoldenCrownApi.Models
+﻿namespace GoldenCrown.Domain.Entities
 {
     public class Account
     {
