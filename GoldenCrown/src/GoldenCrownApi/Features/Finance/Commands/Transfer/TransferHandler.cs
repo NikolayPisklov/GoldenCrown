@@ -25,12 +25,23 @@ namespace GoldenCrownApi.Features.Finance.Commands.Transfer
         {
             await using var dbTransaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-            var senderAccount = await _db.Accounts.Include(x => x.Currency).Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == request.UserId && x.CurrencyId == request.CurrencyId, cancellationToken);
-            if (senderAccount is null)
+            var sender = await (
+                from a in _db.Accounts
+                join c in _db.Currencies on a.CurrencyId equals c.Id
+                where a.UserId == request.UserId && a.CurrencyId == request.CurrencyId
+                select new { Account = a, CurrencyName = c.Name }
+                ).FirstOrDefaultAsync(cancellationToken);
+            if (sender is null)
             {
                 return Result<BalanceResponse>.Failure("Счёт отправителя в выбранной валюте не найден.");
             }
-            var receiverAccount = await _db.Accounts.Include(x => x.User).FirstOrDefaultAsync(x => x.User.Login == request.ReceiverLogin && x.CurrencyId == request.CurrencyId, cancellationToken);
+            var senderAccount = sender.Account;
+            var receiverAccount = await (
+                from a in _db.Accounts
+                join u in _db.Users on a.UserId equals u.Id
+                where u.Login == request.ReceiverLogin && a.CurrencyId == request.CurrencyId
+                select a
+                ).FirstOrDefaultAsync(cancellationToken);
             if (receiverAccount is null)
             {
                 return Result<BalanceResponse>.Failure("Счёт получателя в выбранной валюте не найден.");
@@ -39,29 +50,23 @@ namespace GoldenCrownApi.Features.Finance.Commands.Transfer
             {
                 return Result<BalanceResponse>.Failure("Нельзя перевести средства самому себе.");
             }
-            if (senderAccount.Balance - request.Amount < 0)
+            var withdrawal = senderAccount.Withdraw(request.Amount);
+            if (!withdrawal)
             {
-                return Result<BalanceResponse>.Failure("Недостаточно средств.");
+                return Result<BalanceResponse>.Failure(withdrawal.ErrorMessage!);
             }
-            senderAccount.Balance -= request.Amount;
-            receiverAccount.Balance += request.Amount;
-            var transaction = new Transaction()
-            {
-                SenderAccountId = senderAccount.Id,
-                ReceiverAccountId = receiverAccount.Id,
-                Date = DateTime.UtcNow,
-                Amount = request.Amount
-            };
+            receiverAccount.Deposit(request.Amount);
+            var transaction = Transaction.CreateTransfer(senderAccount, receiverAccount, request.Amount);
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
             await dbTransaction.CommitAsync(cancellationToken);
             await _messagePublisher.PublishAsync(new TransactionEvent(
-                SenderId: senderAccount.User.Id,
-                RecieverId: receiverAccount.User.Id,
+                SenderId: senderAccount.UserId,
+                RecieverId: receiverAccount.UserId,
                 Amount: request.Amount,
-                Currency: senderAccount.Currency.Name
+                Currency: sender.CurrencyName
                 ), cancellationToken);
-            return Result<BalanceResponse>.Success(new BalanceResponse { Balance = senderAccount.Balance, AccountCurrency = senderAccount.Currency.Name});
+            return Result<BalanceResponse>.Success(new BalanceResponse { Balance = senderAccount.Balance, AccountCurrency = sender.CurrencyName });
         }
     }
 }

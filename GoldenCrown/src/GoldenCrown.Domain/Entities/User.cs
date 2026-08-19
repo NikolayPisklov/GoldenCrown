@@ -2,12 +2,18 @@
 {
     public class User
     {
-        public int Id { get; set; }
-        public string Login { get; set; } = null!;
-        public string Name { get; set; } = null!;
-        public string Password { get; set; } = null!;
+        private User() { }
 
-        public Session Session { get; set; } = null!;
-        public ICollection<Account> Accounts { get; set; } = null!;
+        public static User Register(string login, string name, string password) => new()
+        {
+            Login = login,
+            Name = name,
+            Password = password
+        };
+
+        public int Id { get; private set; }
+        public string Login { get; private set; } = null!;
+        public string Name { get; private set; } = null!;
+        public string Password { get; private set; } = null!;
     }
 }

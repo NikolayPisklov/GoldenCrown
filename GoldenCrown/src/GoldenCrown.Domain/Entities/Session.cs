@@ -2,10 +2,26 @@
 {
     public class Session
     {
-        public int UserId { get; set; }
-        public string Token { get; set; } = null!;
-        public DateTime ExpiresAt { get; set; } = DateTime.UtcNow;
+        private Session() { }
+        
+        private static readonly TimeSpan Lifetime = TimeSpan.FromHours(1);
+        public static Session Start(int userId, string token, DateTime utcNow) => new()
+        {
+            UserId = userId,
+            Token = token,
+            ExpiresAt = utcNow + Lifetime
+        };
 
-        public User User { get; set; } = null!;
+        public void Refresh(string token, DateTime utcNow)
+        {
+            Token = token;
+            ExpiresAt = utcNow + Lifetime;
+        }
+
+        public bool IsExpired(DateTime utcNow) => ExpiresAt < utcNow;
+        
+        public int UserId { get; private set; }
+        public string Token { get; private set; } = null!;
+        public DateTime ExpiresAt { get; private set; }
     }
 }

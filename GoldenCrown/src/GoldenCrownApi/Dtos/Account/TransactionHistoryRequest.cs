@@ -4,7 +4,7 @@ namespace GoldenCrownApi.Dtos.Account
     {
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }
-        public int? CurrencyId { get; set; }
+        public int CurrencyId { get; set; }
         public int Limit { get; set; }
         public int Offset { get; set; }
     }

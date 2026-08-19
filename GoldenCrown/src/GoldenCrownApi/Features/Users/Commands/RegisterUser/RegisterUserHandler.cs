@@ -3,6 +3,7 @@ using GoldenCrown.Domain.Entities;
 using GoldenCrownApi.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace GoldenCrownApi.Features.Users.Commands.RegisterUser
 {
@@ -21,15 +22,13 @@ namespace GoldenCrownApi.Features.Users.Commands.RegisterUser
             {
                 return Result.Failure("Пользователь с таким логином уже существует.");
             }
-            var user = new User
-            {
-                Login = request.Login,
-                Password = request.Password,
-                Name = request.Name
-            };
+            var user = User.Register(request.Login, request.Name, request.Password);
+            await using var dbTransaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
             _db.Users.Add(user);
-            _db.Accounts.Add(new Account { User = user });
             await _db.SaveChangesAsync(cancellationToken);
+            _db.Accounts.Add(Account.Open(user.Id, (int)Currencies.RUB));
+            await _db.SaveChangesAsync(cancellationToken);
+            await dbTransaction.CommitAsync(cancellationToken);
             return Result.Success();
         }
     }

@@ -27,24 +27,20 @@ namespace GoldenCrownApi.Features.Users.Commands.LoginUser
                 return Result<string>.Failure("Неверный логин или пароль.");
             }
             string token = Guid.NewGuid().ToString();
-            DateTime expiresAt = DateTime.UtcNow.AddHours(1);
-            await CreateSessionForUser(token, user.Id, expiresAt, cancellationToken);
+            await CreateSessionForUser(token, user.Id, cancellationToken);
             return Result<string>.Success(token);
         }
-        private async Task CreateSessionForUser(string token, int userId, DateTime expiresAt, CancellationToken cancellationToken)
+        private async Task CreateSessionForUser(string token, int userId, CancellationToken cancellationToken)
         {
-            var session = new Session()
-            {
-                UserId = userId,
-                Token = token,
-                ExpiresAt = expiresAt
-            };
             var existingSession = await _db.Sessions.FirstOrDefaultAsync(s => s.UserId == userId, cancellationToken);
             if (existingSession is not null)
             {
-                _db.Sessions.Remove(existingSession);
+                existingSession.Refresh(token, DateTime.UtcNow);
             }
-            _db.Sessions.Add(session);
+            else
+            {
+                _db.Sessions.Add(Session.Start(userId, token, DateTime.UtcNow));
+            }
             await _db.SaveChangesAsync(cancellationToken);
         }
     }

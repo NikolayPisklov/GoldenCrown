@@ -25,33 +25,31 @@ namespace GoldenCrownApi.Features.Finance.Commands.Deposit
         {
             await using var dbTransaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-            var account = await _db.Accounts
-                .Include(x => x.Currency)
-                .FirstOrDefaultAsync(x => x.UserId == request.UserId && x.CurrencyId == request.CurrencyId, cancellationToken);
-            if (account is null)
+            var found = await (
+                from a in _db.Accounts
+                join c in _db.Currencies on a.CurrencyId equals c.Id
+                where a.UserId == request.UserId && a.CurrencyId == request.CurrencyId
+                select new { Account = a, CurrencyName = c.Name }
+                ).FirstOrDefaultAsync(cancellationToken);
+            if (found is null)
             {
                 return Result<BalanceResponse>.Failure("Счёт пользователя не найден.");
             }
-            account.Balance += request.Amount;
-            var transaction = new Transaction()
-            {
-                SenderAccountId = account.Id,
-                ReceiverAccountId = account.Id,
-                Date = DateTime.UtcNow,
-                Amount = request.Amount
-            };
+            var account = found.Account;
+            account.Deposit(request.Amount);
+            var transaction = Transaction.CreateDeposit(account, request.Amount);
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
             await dbTransaction.CommitAsync(cancellationToken);
 
             await _messagePublisher.PublishAsync(new TransactionDepositEvent(
                 request.UserId, 
-                request.Amount, 
-                account.Currency.Name), cancellationToken);
+                request.Amount,
+                found.CurrencyName), cancellationToken);
             return Result<BalanceResponse>.Success(new BalanceResponse()
             {
                 Balance = account.Balance,
-                AccountCurrency = account.Currency.Name
+                AccountCurrency = found.CurrencyName
             });
         }
     }

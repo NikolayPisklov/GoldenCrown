@@ -27,11 +27,7 @@ namespace GoldenCrownApi.Features.Finance.Commands.CreateAccount
             {
                 return Result.Failure("Вы уже имеете счёт в этой валюте.");
             }
-            var account = new Account()
-            {
-                UserId = request.UserId,
-                CurrencyId = request.CurrencyId
-            };
+            var account = Account.Open(request.UserId, request.CurrencyId);
             _db.Accounts.Add(account);
             await _db.SaveChangesAsync(cancellationToken);
             return Result.Success();

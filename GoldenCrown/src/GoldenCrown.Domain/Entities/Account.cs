@@ -1,15 +1,43 @@
-﻿namespace GoldenCrown.Domain.Entities
+﻿using GoldenCrown.Domain.Common;
+
+namespace GoldenCrown.Domain.Entities
 {
     public class Account
     {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public int CurrencyId { get; set; }
-        public decimal Balance { get; set; } = 0;
+        private Account() { }
 
-        public Currency Currency { get; set; } = null!;
-        public User User { get; set; } = null!;
-        public ICollection<Transaction> SentTransactions { get; set; } = new List<Transaction>();
-        public ICollection<Transaction> ReceivedTransactions { get; set; } = new List<Transaction>();
+        public static Account Open(int userId, int currencyId) => new()
+        {
+            UserId = userId,
+            CurrencyId = currencyId,
+            Balance = 0m,
+        };
+
+        public int Id { get; private set; }
+        public int UserId { get; private set; }
+        public int CurrencyId { get; private set; }
+        public decimal Balance { get; private set; }
+
+        public Result Withdraw(decimal amount)
+        {
+            if(amount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount), "Сумма должна быть положительной.");
+            } 
+            if (Balance - amount < 0)
+            {
+                return Result.Failure("Недостаточно средств.");
+            }
+            Balance -= amount;
+            return Result.Success();
+        }
+        public void Deposit(decimal amount) 
+        {
+            if (amount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount), "Сумма должна быть положительной.");
+            }
+            Balance += amount;
+        }
     }
 }

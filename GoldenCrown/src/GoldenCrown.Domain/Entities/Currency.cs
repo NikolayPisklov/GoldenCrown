@@ -2,9 +2,14 @@
 {
     public class Currency
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
+        private Currency() { }
+        public static Currency Create(int id, string name) => new()
+        {
+            Id = id,
+            Name = name
+        };
 
-        public IEnumerable<Account> Accounts { get; set; } = new List<Account>();
+        public int Id { get; private set; }
+        public string Name { get; private set; } = null!;
     }
 }

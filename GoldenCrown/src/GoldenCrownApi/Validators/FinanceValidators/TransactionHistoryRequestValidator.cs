@@ -22,7 +22,6 @@ namespace GoldenCrownApi.Validators.FinanceValidators
 
             RuleFor(x => x.CurrencyId)
                 .GreaterThan(0)
-                .When(x => x.CurrencyId.HasValue)
                 .WithMessage("Некорректная валюта.");
         }
     }

@@ -1,4 +1,4 @@
-﻿using GoldenCrown.Domain.Entities;
+using GoldenCrown.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,13 +27,21 @@ namespace GoldenCrownApi.Database
             var sessionEntity = modelBuilder.Entity<Session>();
             var currencyEntity = modelBuilder.Entity<Currency>();
 
+            userEntity.Property(u => u.Login)
+                .IsRequired()
+                .HasMaxLength(100);
+            userEntity.Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(200);
+            userEntity.Property(u => u.Password)
+                .IsRequired()
+                .HasMaxLength(256);
             userEntity.HasIndex(u => u.Login)
                 .IsUnique();
-            userEntity.HasMany(u => u.Accounts)
-                .WithOne(a => a.User)
-                .HasForeignKey(a => a.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
 
+            currencyEntity.Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(10);
             currencyEntity.HasIndex(u => u.Name)
                 .IsUnique();
 
@@ -46,37 +54,45 @@ namespace GoldenCrownApi.Database
 
             transactionEntity.Property(x => x.Amount)
                 .HasPrecision(18, 2);
-            
+
             transactionEntity
                 .ToTable(t => t.HasCheckConstraint("CK_Transaction_Amount_GreaterThanZero", "[Amount] > 0"));
+
             sessionEntity
                 .HasKey(s => s.UserId);
+            sessionEntity.Property(s => s.Token)
+                .IsRequired()
+                .HasMaxLength(200);
 
+            accountEntity
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             transactionEntity
-                .HasOne(t => t.SenderAccount)
-                .WithMany(a => a.SentTransactions)
+                .HasOne<Account>()
+                .WithMany()
                 .HasForeignKey(t => t.SenderAccountId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             transactionEntity
-                .HasOne(t => t.ReceiverAccount)
-                .WithMany(a => a.ReceivedTransactions)
+                .HasOne<Account>()
+                .WithMany()
                 .HasForeignKey(t => t.ReceiverAccountId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             sessionEntity
-                .HasOne(s => s.User)
-                .WithOne(u => u.Session)
+                .HasOne<User>()
+                .WithOne()
                 .HasForeignKey<Session>(s => s.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            accountEntity.HasOne(a => a.Currency)
-                .WithMany(c => c.Accounts)
+            accountEntity
+                .HasOne<Currency>()
+                .WithMany()
                 .HasForeignKey(a => a.CurrencyId)
                 .OnDelete(DeleteBehavior.NoAction);
-            accountEntity.Property(a => a.CurrencyId)
-                .HasDefaultValue(1);
 
             SeedUserData(currencyEntity);
         }
@@ -84,26 +100,10 @@ namespace GoldenCrownApi.Database
         private void SeedUserData(EntityTypeBuilder<Currency> currencyEntity)
         {
             currencyEntity.HasData(
-                new Currency
-                {
-                    Id = 1,
-                    Name = "RUB",
-                },
-                new Currency
-                {
-                    Id = 2,
-                    Name = "USD",
-                },
-                new Currency
-                {
-                    Id = 3,
-                    Name = "EUR",
-                },
-                new Currency
-                {
-                    Id = 4,
-                    Name = "JPY",
-                }
+                Currency.Create(1, "RUB"),
+                Currency.Create(2, "USD"),
+                Currency.Create(3, "EUR"),
+                Currency.Create(4, "JPY")
             );
         }
     }
