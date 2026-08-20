@@ -37,8 +37,8 @@ services:
 
 #  api:
 #    build:
-#      context: ./GoldenCrown/src/GoldenCrownApi
-#      dockerfile: Dockerfile
+#      context: ./GoldenCrown
+#      dockerfile: src/GoldenCrown.Api/Dockerfile
 #      args:
 #        BUILD_CONFIGURATION: Debug
 #    container_name: goldencrown-api
