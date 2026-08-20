@@ -1,4 +1,4 @@
-﻿namespace GoldenCrownApi.Common
+﻿namespace GoldenCrown.Api.Common
 {
     public static class RoutingKeys
     {

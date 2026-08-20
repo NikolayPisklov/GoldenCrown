@@ -1,13 +1,12 @@
-﻿using System.Text;
-using FluentValidation;
-using GoldenCrownApi.Dtos.UserDtos;
-using GoldenCrownApi.Features.Users.Commands.LoginUser;
-using GoldenCrownApi.Features.Users.Commands.RegisterUser;
+﻿using FluentValidation;
+using GoldenCrown.Api.Dtos.UserDtos;
+using GoldenCrown.Application.Dtos;
+using GoldenCrown.Application.Features.Users.Commands.LoginUser;
+using GoldenCrown.Application.Features.Users.Commands.RegisterUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using RabbitMQ.Client;
 
-namespace GoldenCrownApi.Controllers
+namespace GoldenCrown.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,13 +1,11 @@
-﻿using GoldenCrownApi.Common;
+﻿using GoldenCrown.Api.Common;
+using GoldenCrown.Application.Abstractions;
+using GoldenCrown.Application.Events;
 using RabbitMQ.Client;
 using System.Text.Json;
 
-namespace GoldenCrownApi.RabbitMQ
+namespace GoldenCrown.Api.RabbitMQ
 {
-    public interface IMessagePublisher
-    {
-        Task PublishAsync<T>(T message, CancellationToken cancellationToken) where T : IRoutedMessage;
-    }
     public class RabbitMqPublisher : IMessagePublisher
     {
         private readonly IRabbitMqConnectionManager _connectionManager;
@@ -17,7 +15,7 @@ namespace GoldenCrownApi.RabbitMQ
             _connectionManager = connectionManager;
         }
 
-        public async Task PublishAsync<T>(T message, CancellationToken cancellationToken) where T : IRoutedMessage
+        public async Task PublishAsync<T>(T message, CancellationToken cancellationToken)
         {
             await using var channel = await _connectionManager.CreateChannelAsync(cancellationToken);
             var body = JsonSerializer.SerializeToUtf8Bytes(message);
@@ -26,13 +24,21 @@ namespace GoldenCrownApi.RabbitMQ
                 ContentType = "application/json",
                 DeliveryMode = DeliveryModes.Persistent
             };
+            var routingKey = GetRoutingKey(message!);
             await channel.BasicPublishAsync(
-                exchange: message.Exchange,
-                routingKey: message.RoutingKey,
+                exchange: "",
+                routingKey: routingKey,
                 mandatory: true,
                 basicProperties: props,
                 body: body,
                 cancellationToken: cancellationToken);
         }
+
+        private static string GetRoutingKey(object message) => message switch
+        {
+            TransferEvent => RoutingKeys.Transaction.TransactionSend,
+            DepositEvent => RoutingKeys.Transaction.TransactionDeposit,
+            _ => throw new InvalidOperationException($"Не задан routing key для {message.GetType().Name}.")
+        };
     }
 }

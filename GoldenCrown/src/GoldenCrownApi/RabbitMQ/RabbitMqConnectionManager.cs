@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-namespace GoldenCrownApi.RabbitMQ
+namespace GoldenCrown.Api.RabbitMQ
 {
     public interface IRabbitMqConnectionManager
     {

@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
-using GoldenCrown.Database;
-using GoldenCrownApi.Database;
-using GoldenCrownApi.Middlewares;
-using GoldenCrownApi.RabbitMQ;
-using GoldenCrownApi.Services.BackgroundServices;
+using GoldenCrown.Api.Database;
+using GoldenCrown.Api.Middlewares;
+using GoldenCrown.Api.RabbitMQ;
+using GoldenCrown.Api.Services.BackgroundServices;
+using GoldenCrown.Application;
+using GoldenCrown.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
@@ -16,6 +17,8 @@ builder.Services.AddDbContext<GoldenCrownDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("GoldenCrownDbConnection"));
 });
+
+builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<GoldenCrownDbContext>());
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -38,9 +41,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHostedService<SessionCleanupService>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-});
+builder.Services.AddApplication();
 builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMq"));
 builder.Services.AddSingleton<IRabbitMqConnectionManager, RabbitMqConnectionManager>();
 builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();

@@ -1,10 +1,13 @@
 using GoldenCrown.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using GoldenCrown.Application.Abstractions;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
-namespace GoldenCrownApi.Database
+namespace GoldenCrown.Api.Database
 {
-    public class GoldenCrownDbContext : DbContext
+    public class GoldenCrownDbContext : DbContext, IApplicationDbContext
     {
         public GoldenCrownDbContext(DbContextOptions<GoldenCrownDbContext> options) : base(options)
         {
@@ -17,6 +20,7 @@ namespace GoldenCrownApi.Database
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Currency> Currencies { get; set; }
 
+        public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level, CancellationToken cancellationToken) => Database.BeginTransactionAsync(level, cancellationToken);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

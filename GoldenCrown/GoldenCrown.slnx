@@ -1,5 +1,6 @@
 <Solution>
+  <Project Path="src/GoldenCrown.Application/GoldenCrown.Application.csproj" Id="9df024c8-5f1f-4b36-ba9d-3f9b1a37836f" />
   <Project Path="src/GoldenCrown.Domain/GoldenCrown.Domain.csproj" Id="43fc6558-987c-4fe4-baff-51683e951a80" />
-  <Project Path="src/GoldenCrownApi/GoldenCrownApi.csproj" />
+  <Project Path="src/GoldenCrownApi/GoldenCrown.Api.csproj" />
   <Project Path="src/GoldenCrownConsumer/GoldenCrownConsumer.csproj" />
 </Solution>

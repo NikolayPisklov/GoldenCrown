@@ -1,0 +1,36 @@
+﻿using GoldenCrown.Application.Abstractions;
+using GoldenCrown.Domain.Common;
+using GoldenCrown.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace GoldenCrown.Application.Features.Finance.Commands.CreateAccount
+{
+    public class CreateAccountHandler : IRequestHandler<CreateAccountCommand, Result>
+    {
+        private readonly IApplicationDbContext _db;
+
+        public CreateAccountHandler(IApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<Result> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
+        {
+            var isCurrencyExists = await _db.Currencies.AnyAsync(c => c.Id == request.CurrencyId, cancellationToken);
+            if (!isCurrencyExists) 
+            {
+                return Result.Failure("Такой валюты не существует.");
+            }
+            var isDuplicateAccount = await _db.Accounts.AnyAsync(a => a.CurrencyId == request.CurrencyId && a.UserId == request.UserId, cancellationToken);
+            if (isDuplicateAccount)
+            {
+                return Result.Failure("Вы уже имеете счёт в этой валюте.");
+            }
+            var account = Account.Open(request.UserId, request.CurrencyId);
+            _db.Accounts.Add(account);
+            await _db.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
+    }
+}

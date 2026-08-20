@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using GoldenCrownApi.Dtos.Account;
+using GoldenCrown.Api.Dtos.AccountDtos;
 
-namespace GoldenCrownApi.Validators.FinanceValidators
+namespace GoldenCrown.Api.Validators.FinanceValidators
 {
     public class DepositRequestValidator : AbstractValidator<DepositRequest>
     {

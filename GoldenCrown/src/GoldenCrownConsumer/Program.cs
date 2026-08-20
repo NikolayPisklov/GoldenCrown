@@ -39,11 +39,11 @@ consumer.ReceivedAsync += async (model, ea) =>
     {
         case "transaction.deposit":
             var depositMessage = JsonSerializer.Deserialize<DepositMessage>(json)!;
-            Console.WriteLine($"Message received.\nMessage type: deposit\n\nDeposit details: - User ID: {depositMessage.UserId}\n - Amount: {depositMessage.Amount}\n- Currency: {depositMessage.Currency}");
+            Console.WriteLine($"Message received.\nMessage type: deposit\nDeposit details:\n- User ID: {depositMessage.UserId}\n- Amount: {depositMessage.Amount}\n- Currency: {depositMessage.Currency}");
             break;
         case "transaction.send":
             var transactionMessage = JsonSerializer.Deserialize<TransactionMessage>(json)!;
-            Console.WriteLine($"Message received.\nMessage type: deposit\n\nDeposit details:\n- Sender ID: {transactionMessage.SenderId}\n- Reviever ID: {transactionMessage.RecieverId}\n- Amount: {transactionMessage.Amount}\n- Currency: {transactionMessage.Currency}");
+            Console.WriteLine($"Message received.\nMessage type: deposit\nTransaction details:\n- Sender ID: {transactionMessage.SenderId}\n- Reviever ID: {transactionMessage.ReceiverId}\n- Amount: {transactionMessage.Amount}\n- Currency: {transactionMessage.Currency}");
             break;
     }
 };

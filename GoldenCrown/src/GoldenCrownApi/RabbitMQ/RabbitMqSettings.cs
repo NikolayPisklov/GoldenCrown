@@ -1,4 +1,4 @@
-﻿namespace GoldenCrownApi.RabbitMQ
+﻿namespace GoldenCrown.Api.RabbitMQ
 {
     public class RabbitMqSettings
     {

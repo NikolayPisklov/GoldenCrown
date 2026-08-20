@@ -1,4 +1,4 @@
-﻿namespace GoldenCrownApi.Extentions
+﻿namespace GoldenCrown.Api.Extentions
 {
     public static class HttpContextExtentions
     {
