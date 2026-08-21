@@ -1,4 +1,4 @@
-﻿namespace GoldenCrown.Infrastructure.Messaging.RabbitMQ
+﻿namespace GoldenCrown.Contracts
 {
     public static class RoutingKeys
     {

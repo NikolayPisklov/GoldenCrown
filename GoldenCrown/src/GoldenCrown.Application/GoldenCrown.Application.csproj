@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GoldenCrown.Contracts\GoldenCrown.Contracts.csproj" />
     <ProjectReference Include="..\GoldenCrown.Domain\GoldenCrown.Domain.csproj" />
   </ItemGroup>
 

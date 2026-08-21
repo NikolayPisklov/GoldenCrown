@@ -1,6 +1,6 @@
 using GoldenCrown.Application.Abstractions;
 using GoldenCrown.Application.Dtos;
-using GoldenCrown.Application.Events;
+using GoldenCrown.Contracts.Events;
 using GoldenCrown.Domain.Common;
 using GoldenCrown.Domain.Entities;
 using MediatR;

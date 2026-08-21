@@ -1,5 +1,6 @@
 ﻿using GoldenCrown.Application.Abstractions;
-using GoldenCrown.Application.Events;
+using GoldenCrown.Contracts;
+using GoldenCrown.Contracts.Events;
 using RabbitMQ.Client;
 using System.Text.Json;
 
