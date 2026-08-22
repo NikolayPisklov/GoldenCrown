@@ -39,8 +39,6 @@ services:
    build:
      context: ./GoldenCrown
      dockerfile: src/GoldenCrown.Api/Dockerfile
-     args:
-       BUILD_CONFIGURATION: Debug
    container_name: goldencrown-api
    depends_on:
      db:
@@ -55,6 +53,20 @@ services:
      RabbitMq__HostName: "rabbitmq"
      RabbitMq__UserName: "guest"
      RabbitMq__Password: "guest"
+
+  consumer:
+    build:
+      context: ./GoldenCrown
+      dockerfile: src/GoldenCrown.Consumer/Dockerfile
+    container_name: goldencrown-consumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RabbitMq__HostName: "rabbitmq"
+      RabbitMq__UserName: "guest"
+      RabbitMq__Password: "guest"
+    restart: unless-stopped
 
 volumes:
   sql-data:

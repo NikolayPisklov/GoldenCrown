@@ -3,6 +3,7 @@ using GoldenCrownConsumer;
 using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using System.Text;
 using System.Text.Json;
 using static GoldenCrown.Contracts.RoutingKeys;
@@ -21,10 +22,23 @@ var factory = new ConnectionFactory
     HostName = rabbitSettings.HostName,
     Port = rabbitSettings.Port,
     UserName = rabbitSettings.UserName,
-    Password = rabbitSettings.Password,
-    VirtualHost = rabbitSettings.VirtualHost
+    Password = rabbitSettings.Password
 };
-await using var connection = await factory.CreateConnectionAsync();
+IConnection connection = null;
+var attempts = 0;
+const int maxAttempts = 10;
+
+while (connection == null)
+{
+    try
+    {
+        connection = await factory.CreateConnectionAsync();
+    }
+    catch (BrokerUnreachableException) when (++attempts < maxAttempts)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(3));
+    }
+}
 await using var channel = await connection.CreateChannelAsync();
 
 await channel.QueueDeclareAsync(
@@ -55,18 +69,18 @@ consumer.ReceivedAsync += async (model, ea) =>
         {
             case Transaction.TransactionDeposit:
                 var depositEvent = JsonSerializer.Deserialize<DepositEvent>(json)
-                    ?? throw new JsonException("Тело сообщения пустое.");
-                Console.WriteLine($"Message received.\nMessage type: deposit\nDeposit details:\n- User ID: {depositEvent.UserId}\n- Amount: {depositEvent.Amount}\n- Currency: {depositEvent.Currency}");
+                    ?? throw new JsonException("\nТело сообщения пустое.");
+                Console.WriteLine($"\nMessage received.\nMessage type: deposit\nDeposit details:\n- User ID: {depositEvent.UserId}\n- Amount: {depositEvent.Amount}\n- Currency: {depositEvent.Currency}");
                 break;
 
             case Transaction.TransactionSend:
                 var transferEvent = JsonSerializer.Deserialize<TransferEvent>(json)
-                    ?? throw new JsonException("Тело сообщения пустое.");
-                Console.WriteLine($"Message received.\nMessage type: transfer\nTransaction details:\n- Sender ID: {transferEvent.SenderId}\n- Receiver ID: {transferEvent.ReceiverId}\n- Amount: {transferEvent.Amount}\n- Currency: {transferEvent.Currency}");
+                    ?? throw new JsonException("\nТело сообщения пустое.");
+                Console.WriteLine($"\nMessage received.\nMessage type: transfer\nTransaction details:\n- Sender ID: {transferEvent.SenderId}\n- Receiver ID: {transferEvent.ReceiverId}\n- Amount: {transferEvent.Amount}\n- Currency: {transferEvent.Currency}");
                 break;
 
             default:
-                Console.WriteLine($"Unknown routing key: {ea.RoutingKey}. Message discarded.");
+                Console.WriteLine($"\nUnknown routing key: {ea.RoutingKey}. Message discarded.");
                 await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                 return;
         }
@@ -75,7 +89,7 @@ consumer.ReceivedAsync += async (model, ea) =>
     }
     catch (JsonException)
     {
-        Console.WriteLine("Invalid message format. Message discarded.");
+        Console.WriteLine("\nInvalid message format. Message discarded.");
         await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
     }
 };
