@@ -9,6 +9,7 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Transfer
         int UserId,
         string ReceiverLogin,
         decimal Amount,
-        int CurrencyId
+        int FromCurrencyId,
+        int ToCurrencyId
     ) : IRequest<Result<BalanceResponse>>;
 }
