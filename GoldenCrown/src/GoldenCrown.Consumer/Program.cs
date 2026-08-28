@@ -70,13 +70,28 @@ consumer.ReceivedAsync += async (model, ea) =>
             case Transaction.TransactionDeposit:
                 var depositEvent = JsonSerializer.Deserialize<DepositEvent>(json)
                     ?? throw new JsonException("\nТело сообщения пустое.");
-                Console.WriteLine($"\nMessage received.\nMessage type: deposit\nDeposit details:\n- User ID: {depositEvent.UserId}\n- Amount: {depositEvent.Amount}\n- Currency: {depositEvent.Currency}");
+                Console.WriteLine(
+                    $"\nMessage received.\nMessage type: deposit\nDeposit details:" +
+                    $"\n- Transaction ID: {depositEvent.TransactionId}" +
+                    $"\n- Date: {depositEvent.Date:yyyy-MM-dd HH:mm:ss} UTC" +
+                    $"\n- User ID: {depositEvent.UserId}" +
+                    $"\n- Amount: {depositEvent.Amount} {depositEvent.CurrencyFrom}" +
+                    $"\n- Credited: {depositEvent.ConvertedAmount} {depositEvent.CurrencyTo}" +
+                    $"\n- Rate: {depositEvent.Rate}");
                 break;
 
             case Transaction.TransactionSend:
                 var transferEvent = JsonSerializer.Deserialize<TransferEvent>(json)
                     ?? throw new JsonException("\nТело сообщения пустое.");
-                Console.WriteLine($"\nMessage received.\nMessage type: transfer\nTransaction details:\n- Sender ID: {transferEvent.SenderId}\n- Receiver ID: {transferEvent.ReceiverId}\n- Amount: {transferEvent.Amount}\n- Currency: {transferEvent.Currency}");
+                Console.WriteLine(
+                    $"\nMessage received.\nMessage type: transfer\nTransaction details:" +
+                    $"\n- Transaction ID: {transferEvent.TransactionId}" +
+                    $"\n- Date: {transferEvent.Date:yyyy-MM-dd HH:mm:ss} UTC" +
+                    $"\n- Sender ID: {transferEvent.SenderId}" +
+                    $"\n- Receiver ID: {transferEvent.ReceiverId}" +
+                    $"\n- Sent: {transferEvent.Amount} {transferEvent.CurrencyFrom}" +
+                    $"\n- Received: {transferEvent.ConvertedAmount} {transferEvent.CurrencyTo}" +
+                    $"\n- Rate: {transferEvent.Rate}");
                 break;
 
             default:

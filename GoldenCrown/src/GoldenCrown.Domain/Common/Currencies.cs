@@ -2,9 +2,9 @@
 {
     public enum Currencies
     {
-        RUB = 1,
+        RUB = 1, 
         USD = 2,
         EUR = 3,
-        JPY = 4,
+        JPY = 4
     }
 }

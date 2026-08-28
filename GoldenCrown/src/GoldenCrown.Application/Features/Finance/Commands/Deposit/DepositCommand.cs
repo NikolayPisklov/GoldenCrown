@@ -8,6 +8,7 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Deposit
     (
         int UserId,
         decimal Amount,
-        int CurrencyId
+        int CurrencyFromId,
+        int CurrencyToId
     ) : IRequest<Result<BalanceResponse>>;
 }

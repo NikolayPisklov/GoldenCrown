@@ -58,6 +58,16 @@ namespace GoldenCrown.Infrastructure.Persistence
 
             transactionEntity.Property(x => x.Amount)
                 .HasPrecision(18, 2);
+            transactionEntity.Property(x => x.ConvertedAmount)
+                .HasPrecision(18, 2);
+            transactionEntity.Property(x => x.Rate)
+                .HasPrecision(18, 8);
+            transactionEntity.Property(x => x.CurrencyFrom)
+                .IsRequired()
+                .HasMaxLength(10);
+            transactionEntity.Property(x => x.CurrencyTo)
+                .IsRequired()
+                .HasMaxLength(10);
 
             transactionEntity
                 .ToTable(t => t.HasCheckConstraint("CK_Transaction_Amount_GreaterThanZero", "[Amount] > 0"));

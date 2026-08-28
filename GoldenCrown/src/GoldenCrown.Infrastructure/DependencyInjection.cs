@@ -2,6 +2,7 @@
 using GoldenCrown.Infrastructure.BackgroundServices;
 using GoldenCrown.Infrastructure.Messaging.RabbitMQ;
 using GoldenCrown.Infrastructure.Persistence;
+using GoldenCrown.Infrastructure.Services.ExchangeRate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,9 @@ namespace GoldenCrown.Infrastructure
             services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
             services.AddHostedService<SessionCleanupService>();
+
+            services.AddHttpClient();
+            services.AddScoped<IExchangeRateProvider, CurrescyExchangeRateProvider>();
             return services;
         }
     }

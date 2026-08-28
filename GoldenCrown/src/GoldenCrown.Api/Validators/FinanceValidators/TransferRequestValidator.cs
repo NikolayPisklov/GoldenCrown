@@ -11,9 +11,12 @@ namespace GoldenCrown.Api.Validators.FinanceValidators
                 .NotEmpty()
                 .WithMessage("Логин получателя обязателен для заполнения.");
 
-            RuleFor(x => x.CurrencyId)
+            RuleFor(x => x.FromCurrencyId)
                 .GreaterThan(0)
-                .WithMessage("Валюта обязательна для заполнения.");
+                .WithMessage("Валюта отправителя обязательна для заполнения.");
+            RuleFor(x => x.ToCurrencyId)
+                .GreaterThan(0)
+                .WithMessage("Валюта получателя обязательна для заполнения.");
 
             RuleFor(x => x.Amount)
                 .GreaterThanOrEqualTo(0.01m)
