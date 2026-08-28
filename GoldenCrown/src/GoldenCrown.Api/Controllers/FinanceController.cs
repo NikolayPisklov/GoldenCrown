@@ -89,7 +89,7 @@ namespace GoldenCrown.Api.Controllers
                 return BadRequest(problemDetails);
             }
             var userId = HttpContext.GetUserId();
-            var result = await _mediator.Send(new DepositCommand(userId, request.Amount, request.CurrencyId), cancellationToken);
+            var result = await _mediator.Send(new DepositCommand(userId, request.Amount, request.CurrencyFromId, request.CurrencyToId), cancellationToken);
             if (result)
             {
                 return Ok(result.Value);

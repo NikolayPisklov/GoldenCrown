@@ -24,54 +24,87 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Transfer
 
         public async Task<Result<BalanceResponse>> Handle(TransferCommand request, CancellationToken cancellationToken)
         {
+            var currencyFrom = (Currencies)request.FromCurrencyId;
+            var currencyTo = (Currencies)request.ToCurrencyId;
+            if (!Enum.IsDefined(currencyFrom))
+            {
+                return Result<BalanceResponse>.Failure($"Валюта с идентификатором {request.FromCurrencyId} не найдена.");
+            }
+            if (!Enum.IsDefined(currencyTo))
+            {
+                return Result<BalanceResponse>.Failure($"Валюта с идентификатором {request.ToCurrencyId} не найдена.");
+            }
+
+            var rateResult = await _exchangeRateProvider.GetRateAsync(currencyFrom.ToString(), currencyTo.ToString(), cancellationToken);
+            if (!rateResult)
+            {
+                return Result<BalanceResponse>.Failure(rateResult.ErrorMessage!);
+            }
+            var rate = rateResult.Value;
+
+            var convertationResult = CurrencyConverter.Convert(request.Amount, currencyFrom, currencyTo, rate);
+            if (!convertationResult)
+            {
+                return Result<BalanceResponse>.Failure(convertationResult.ErrorMessage!);
+            }
+            var convertedAmount = convertationResult.Value;
+
             await using var dbTransaction = await _db.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-            var sender = await (
-                from a in _db.Accounts
-                join c in _db.Currencies on a.CurrencyId equals c.Id
-                where a.UserId == request.UserId && a.CurrencyId == request.FromCurrencyId
-                select new { Account = a, CurrencyName = c.Name }
-                ).FirstOrDefaultAsync(cancellationToken);
-            if (sender is null)
+            var senderAccount = await GetAccountAsync(request.UserId, request.FromCurrencyId, cancellationToken);
+            if (senderAccount is null)
             {
                 return Result<BalanceResponse>.Failure("Счёт отправителя в выбранной валюте не найден.");
             }
-            var senderAccount = sender.Account;
-            var receiver = await (
-                from a in _db.Accounts
-                join c in _db.Currencies on a.CurrencyId equals c.Id
-                join u in _db.Users on a.UserId equals u.Id
-                where u.Login == request.ReceiverLogin && a.CurrencyId == request.ToCurrencyId
-                select new {Account = a, CurrencyName = c.Name}
-                ).FirstOrDefaultAsync(cancellationToken);
-            if (receiver is null)
+            var receiverAccount = await GetAccountAsync(request.ReceiverLogin, request.ToCurrencyId, cancellationToken);
+            if (receiverAccount is null)
             {
                 return Result<BalanceResponse>.Failure("Счёт получателя в выбранной валюте не найден.");
             }
-            var receiverAccount = receiver.Account;
             if (senderAccount.Id == receiverAccount.Id)
             {
                 return Result<BalanceResponse>.Failure("Нельзя перевести средства самому себе.");
             }
-            var rate = await _exchangeRateProvider.GetRateAsync(sender.CurrencyName, receiver.CurrencyName, cancellationToken);
+
             var withdrawal = senderAccount.Withdraw(request.Amount);
             if (!withdrawal)
             {
                 return Result<BalanceResponse>.Failure(withdrawal.ErrorMessage!);
             }
-            var receivedAmount = request.Amount * rate;
-            receiverAccount.Deposit(receivedAmount);
-            var transaction = Transaction.CreateTransfer(senderAccount, receiverAccount, request.Amount);
+            receiverAccount.Deposit(convertedAmount);
+
+            var transaction = Transaction.CreateTransfer(senderAccount, receiverAccount, request.Amount, convertedAmount, rate, currencyFrom.ToString(), currencyTo.ToString());
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
             await dbTransaction.CommitAsync(cancellationToken);
+
             await _messagePublisher.PublishAsync(new TransferEvent(
+                TransactionId: transaction.Id,
                 SenderId: senderAccount.UserId,
                 ReceiverId: receiverAccount.UserId,
                 Amount: request.Amount,
-                Currency: sender.CurrencyName
+                CurrencyFrom: currencyFrom.ToString(),
+                ConvertedAmount: convertedAmount,
+                CurrencyTo: currencyTo.ToString(),
+                Rate: rate,
+                Date: transaction.Date
                 ), cancellationToken);
-            return Result<BalanceResponse>.Success(new BalanceResponse { Balance = senderAccount.Balance, AccountCurrency = sender.CurrencyName });
+            return Result<BalanceResponse>.Success(new BalanceResponse { Balance = senderAccount.Balance, AccountCurrency = currencyFrom.ToString() });
+        }
+
+        private async Task<Account?> GetAccountAsync(int userId, int currencyId, CancellationToken cancellationToken)
+        {
+            return await _db.Accounts
+                .FirstOrDefaultAsync(a => a.UserId == userId && a.CurrencyId == currencyId, cancellationToken);
+        }
+        private async Task<Account?> GetAccountAsync(string login, int currencyId, CancellationToken cancellationToken)
+        {
+            return await (
+                from a in _db.Accounts
+                join u in _db.Users on a.UserId equals u.Id
+                where u.Login == login && a.CurrencyId == currencyId
+                select a
+                ).FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

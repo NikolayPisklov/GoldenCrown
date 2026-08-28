@@ -1,5 +1,5 @@
-﻿using GoldenCrown.Application.Abstractions;
-using Microsoft.Extensions.Logging;
+using GoldenCrown.Application.Abstractions;
+using GoldenCrown.Domain.Common;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -14,25 +14,33 @@ namespace GoldenCrown.Infrastructure.Services.ExchangeRate
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken)
+        public async Task<Result<decimal>> GetRateAsync(string from, string to, CancellationToken cancellationToken)
         {
             if(from == to)
             {
-                return 1;
+                return Result<decimal>.Success(1);
             }
             var httpClient = _httpClientFactory.CreateClient();
 
-            var info = await httpClient.GetFromJsonAsync<CurrencyRate>(
-                $"https://api.frankfurter.dev/v2/rate/{from}/{to}",
-                new JsonSerializerOptions(JsonSerializerDefaults.Web),
-                cancellationToken);
-            if (info != null)
+            try
             {
-                return info.Rate;
+                var info = await httpClient.GetFromJsonAsync<CurrencyRate>(
+                    $"https://api.frankfurter.dev/v2/rate/{from}/{to}",
+                    new JsonSerializerOptions(JsonSerializerDefaults.Web),
+                    cancellationToken);
+                if (info is null)
+                {
+                    return Result<decimal>.Failure($"Не удалось получить курс {from} → {to}.");
+                }
+                return Result<decimal>.Success(info.Rate);
             }
-            else
+            catch (HttpRequestException)
             {
-                throw new NullReferenceException("External API returned null.");
+                return Result<decimal>.Failure($"Курс {from} → {to} недоступен. Возможно, эта пара валют не поддерживается сервисом курсов.");
+            }
+            catch (JsonException)
+            {
+                return Result<decimal>.Failure($"Сервис курсов вернул неожиданный ответ для пары {from} → {to}.");
             }
         }
     }
