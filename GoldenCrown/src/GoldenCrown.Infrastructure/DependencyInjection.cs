@@ -4,6 +4,7 @@ using GoldenCrown.Infrastructure.Messaging.RabbitMQ;
 using GoldenCrown.Infrastructure.Persistence;
 using GoldenCrown.Infrastructure.Services.ExchangeRate;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,7 +27,16 @@ namespace GoldenCrown.Infrastructure
             services.AddHostedService<SessionCleanupService>();
 
             services.AddHttpClient();
-            services.AddScoped<IExchangeRateProvider, CurrescyExchangeRateProvider>();
+
+            services.AddMemoryCache(options =>
+            {
+                options.SizeLimit = 1000;
+                options.CompactionPercentage = 0.25;
+            });
+            services.AddScoped<CurrescyExchangeRateProvider>();
+            services.AddScoped<IExchangeRateProvider>(sp => new CachedExchangeRateProvider(
+                sp.GetRequiredService<CurrescyExchangeRateProvider>(),
+                sp.GetRequiredService<IMemoryCache>()));
             return services;
         }
     }
