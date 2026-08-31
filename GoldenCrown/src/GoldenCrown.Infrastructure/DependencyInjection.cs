@@ -4,6 +4,7 @@ using GoldenCrown.Infrastructure.Messaging.RabbitMQ;
 using GoldenCrown.Infrastructure.Persistence;
 using GoldenCrown.Infrastructure.Services.ExchangeRate;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +37,12 @@ namespace GoldenCrown.Infrastructure
             services.AddScoped<CurrescyExchangeRateProvider>();
             services.AddScoped<IExchangeRateProvider>(sp => new CachedExchangeRateProvider(
                 sp.GetRequiredService<CurrescyExchangeRateProvider>(),
-                sp.GetRequiredService<IMemoryCache>()));
+                sp.GetRequiredService<IDistributedCache>()));
+
+            services.AddStackExchangeRedisCache(redisOptions =>
+            {
+                redisOptions.Configuration = configuration.GetConnectionString("Redis");
+            });
             return services;
         }
     }
