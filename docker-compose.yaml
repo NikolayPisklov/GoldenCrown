@@ -35,6 +35,18 @@ services:
       retries: 10
       start_period: 20s
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_goldencrown_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   api:
    build:
      context: ./GoldenCrown
@@ -44,6 +56,8 @@ services:
      db:
        condition: service_healthy
      rabbitmq:
+       condition: service_healthy
+     redis:
        condition: service_healthy
    ports:
      - "8080:8080"
@@ -71,3 +85,4 @@ services:
 volumes:
   sql-data:
   rabbitmq-data:
+  redis_goldencrown_data:
