@@ -5,13 +5,13 @@ using System.Text.Json;
 
 namespace GoldenCrown.Infrastructure.Services.ExchangeRate
 {
-    public class CurrescyExchangeRateProvider : IExchangeRateProvider
+    public class ExchangeRateProvider : IExchangeRateProvider
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public CurrescyExchangeRateProvider(IHttpClientFactory httpClientFactory)
+        public ExchangeRateProvider(HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
 
         public async Task<Result<decimal>> GetRateAsync(string from, string to, CancellationToken cancellationToken)
@@ -20,12 +20,11 @@ namespace GoldenCrown.Infrastructure.Services.ExchangeRate
             {
                 return Result<decimal>.Success(1);
             }
-            var httpClient = _httpClientFactory.CreateClient();
 
             try
             {
-                var info = await httpClient.GetFromJsonAsync<CurrencyRate>(
-                    $"https://api.frankfurter.dev/v2/rate/{from}/{to}",
+                var info = await _httpClient.GetFromJsonAsync<CurrencyRate>(
+                    $"v2/rate/{from}/{to}",
                     new JsonSerializerOptions(JsonSerializerDefaults.Web),
                     cancellationToken);
                 if (info is null)
@@ -36,7 +35,7 @@ namespace GoldenCrown.Infrastructure.Services.ExchangeRate
             }
             catch (HttpRequestException)
             {
-                return Result<decimal>.Failure($"Курс {from} → {to} недоступен. Возможно, эта пара валют не поддерживается сервисом курсов.");
+                return Result<decimal>.Failure($"Не удалось получить курс {from} → {to}. Повторите попытку позже.");
             }
             catch (JsonException)
             {

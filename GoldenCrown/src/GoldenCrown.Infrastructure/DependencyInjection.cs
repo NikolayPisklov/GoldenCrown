@@ -6,10 +6,13 @@ using GoldenCrown.Infrastructure.Services.ExchangeRate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
 using RedLockNet;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
+using System.Net;
 
 namespace GoldenCrown.Infrastructure
 {
@@ -29,7 +32,12 @@ namespace GoldenCrown.Infrastructure
 
             services.AddHostedService<SessionCleanupService>();
 
-            services.AddHttpClient();
+            services.AddHttpClient<ExchangeRateProvider>(c => 
+                {
+                    c.BaseAddress = new Uri("https://api.frankfurter.dev/");
+                })
+                .SetHandlerLifetime(TimeSpan.FromMinutes(2))
+                .AddPolicyHandler(GetRetryPolicy());
 
             services.AddMemoryCache(options =>
             {
@@ -47,10 +55,9 @@ namespace GoldenCrown.Infrastructure
                     sp.GetRequiredService<ConnectionMultiplexer>()
                 })
             );
-            
-            services.AddScoped<CurrescyExchangeRateProvider>();
+
             services.AddScoped<IExchangeRateProvider>(sp => ActivatorUtilities.CreateInstance<CachedExchangeRateProvider>(
-                sp, sp.GetRequiredService<CurrescyExchangeRateProvider>()));
+                sp, sp.GetRequiredService<ExchangeRateProvider>()));
 
             services.AddStackExchangeRedisCache(redisOptions =>
             {
@@ -58,6 +65,13 @@ namespace GoldenCrown.Infrastructure
             });
 
             return services;
+        }
+        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == HttpStatusCode.UnprocessableEntity)
+                .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)));
         }
     }
 }
