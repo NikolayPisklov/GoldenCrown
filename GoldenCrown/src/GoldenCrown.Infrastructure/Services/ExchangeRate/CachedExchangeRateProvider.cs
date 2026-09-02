@@ -30,14 +30,12 @@ namespace GoldenCrown.Infrastructure.Services.ExchangeRate
         public async Task<Result<decimal>> GetRateAsync(string from, string to, CancellationToken cancellationToken)
         {
             var cacheKey = $"rate:{from}:{to}";
-
             var cachedRate = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
             if (decimal.TryParse(cachedRate, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal rate))
             {
                 return Result<decimal>.Success(rate);
             }
-
-            await using var redLock = await _distributedLockFactory.CreateLockAsync("lock:" + cacheKey, LockExpiry, LockWait, LockRetry, cancellationToken);
+            await using var redLock = await _distributedLockFactory.CreateLockAsync($"lock:{cacheKey}", LockExpiry, LockWait, LockRetry, cancellationToken);
             if (!redLock.IsAcquired)
             {
                 _logger.LogWarning("Distributed lock {Resource} was not acquired ({Status}), falling back to a direct call.", cacheKey, redLock.Status);
@@ -48,19 +46,16 @@ namespace GoldenCrown.Infrastructure.Services.ExchangeRate
             {
                 return Result<decimal>.Success(rate);
             }
-
             var rateResult = await _inner.GetRateAsync(from, to, cancellationToken);
             if (!rateResult)
             {
                 return rateResult;
             }
-
             await _distributedCache.SetStringAsync(
                 cacheKey,
                 rateResult.Value.ToString(CultureInfo.InvariantCulture),
                 new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = CacheLifetime },
                 cancellationToken);
-
             return rateResult;
         }
     }
