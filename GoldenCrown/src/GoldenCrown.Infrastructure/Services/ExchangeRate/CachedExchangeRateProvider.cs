@@ -35,7 +35,7 @@ namespace GoldenCrown.Infrastructure.Services.ExchangeRate
             {
                 return Result<decimal>.Success(rate);
             }
-            await using var redLock = await _distributedLockFactory.CreateLockAsync($"lock:{cacheKey}", LockExpiry, LockWait, LockRetry, cancellationToken);
+            await using var redLock = await _distributedLockFactory.CreateLockAsync($"{cacheKey}", LockExpiry, LockWait, LockRetry, cancellationToken);
             if (!redLock.IsAcquired)
             {
                 _logger.LogWarning("Distributed lock {Resource} was not acquired ({Status}), falling back to a direct call.", cacheKey, redLock.Status);

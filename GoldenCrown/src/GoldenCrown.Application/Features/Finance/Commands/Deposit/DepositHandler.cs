@@ -1,11 +1,13 @@
 using GoldenCrown.Application.Abstractions;
 using GoldenCrown.Application.Dtos;
+using GoldenCrown.Contracts;
 using GoldenCrown.Contracts.Events;
 using GoldenCrown.Domain.Common;
 using GoldenCrown.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Text.Json;
 
 namespace GoldenCrown.Application.Features.Finance.Commands.Deposit
 {
@@ -62,9 +64,7 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Deposit
             var transaction = Transaction.CreateDeposit(account, request.Amount, rate, currencyFrom.ToString(), currencyTo.ToString(), convertedAmount);
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
-            await dbTransaction.CommitAsync(cancellationToken);
-
-            await _messagePublisher.PublishAsync(new DepositEvent(
+            var depositEvent = new DepositEvent(
                 TransactionId: transaction.Id,
                 UserId: request.UserId,
                 Amount: request.Amount,
@@ -72,7 +72,12 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Deposit
                 ConvertedAmount: convertedAmount,
                 CurrencyTo: currencyTo.ToString(),
                 Rate: rate,
-                Date: transaction.Date), cancellationToken);
+                Date: transaction.Date);
+            var json = JsonSerializer.Serialize(depositEvent);
+            var outboxMessage = OutboxMessage.CreateOutboxMessage(new Guid(), RoutingKeys.Transaction.TransactionDeposit, json, DateTime.UtcNow);
+            _db.OutboxMessages.Add(outboxMessage);
+            await _db.SaveChangesAsync(cancellationToken);
+            await dbTransaction.CommitAsync(cancellationToken);
             return Result<BalanceResponse>.Success(new BalanceResponse()
             {
                 Balance = account.Balance,

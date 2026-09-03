@@ -19,6 +19,7 @@ namespace GoldenCrown.Infrastructure.Persistence
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Currency> Currencies { get; set; }
+        public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level, CancellationToken cancellationToken) => Database.BeginTransactionAsync(level, cancellationToken);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +31,7 @@ namespace GoldenCrown.Infrastructure.Persistence
             var transactionEntity = modelBuilder.Entity<Transaction>();
             var sessionEntity = modelBuilder.Entity<Session>();
             var currencyEntity = modelBuilder.Entity<Currency>();
+            var outboxMessageEntity = modelBuilder.Entity<OutboxMessage>();
 
             userEntity.Property(u => u.Login)
                 .IsRequired()
@@ -107,6 +109,9 @@ namespace GoldenCrown.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(a => a.CurrencyId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            outboxMessageEntity.HasIndex(o => o.CreatedAt)
+                .HasFilter("\"SentAt\" IS NULL");
 
             SeedUserData(currencyEntity);
         }

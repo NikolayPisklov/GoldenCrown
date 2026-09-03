@@ -1,24 +1,24 @@
 using GoldenCrown.Application.Abstractions;
 using GoldenCrown.Application.Dtos;
+using GoldenCrown.Contracts;
 using GoldenCrown.Contracts.Events;
 using GoldenCrown.Domain.Common;
 using GoldenCrown.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Text.Json;
 
 namespace GoldenCrown.Application.Features.Finance.Commands.Transfer
 {
     public class TransferHandler : IRequestHandler<TransferCommand, Result<BalanceResponse>>
     {
         private readonly IApplicationDbContext _db;
-        private readonly IMessagePublisher _messagePublisher;
         private readonly IExchangeRateProvider _exchangeRateProvider;
 
-        public TransferHandler(IApplicationDbContext db, IMessagePublisher messagePublisher, IExchangeRateProvider exchangeRateProvider)
+        public TransferHandler(IApplicationDbContext db, IExchangeRateProvider exchangeRateProvider)
         {
             _db = db;
-            _messagePublisher = messagePublisher;
             _exchangeRateProvider = exchangeRateProvider;
         }
 
@@ -76,9 +76,7 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Transfer
             var transaction = Transaction.CreateTransfer(senderAccount, receiverAccount, request.Amount, convertedAmount, rate, currencyFrom.ToString(), currencyTo.ToString());
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
-            await dbTransaction.CommitAsync(cancellationToken);
-
-            await _messagePublisher.PublishAsync(new TransferEvent(
+            var transferEvent = new TransferEvent(
                 TransactionId: transaction.Id,
                 SenderId: senderAccount.UserId,
                 ReceiverId: receiverAccount.UserId,
@@ -87,8 +85,12 @@ namespace GoldenCrown.Application.Features.Finance.Commands.Transfer
                 ConvertedAmount: convertedAmount,
                 CurrencyTo: currencyTo.ToString(),
                 Rate: rate,
-                Date: transaction.Date
-                ), cancellationToken);
+                Date: transaction.Date);
+            var json = JsonSerializer.Serialize(transferEvent);
+            var outboxMessage = OutboxMessage.CreateOutboxMessage(new Guid(), RoutingKeys.Transaction.TransactionSend, json, DateTime.UtcNow);
+            _db.OutboxMessages.Add(outboxMessage);
+            await _db.SaveChangesAsync(cancellationToken);
+            await dbTransaction.CommitAsync(cancellationToken);
             return Result<BalanceResponse>.Success(new BalanceResponse { Balance = senderAccount.Balance, AccountCurrency = currencyFrom.ToString() });
         }
 
