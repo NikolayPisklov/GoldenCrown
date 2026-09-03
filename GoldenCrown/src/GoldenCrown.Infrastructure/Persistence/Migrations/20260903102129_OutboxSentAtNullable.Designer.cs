@@ -4,6 +4,7 @@ using GoldenCrown.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoldenCrown.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(GoldenCrownDbContext))]
-    partial class GoldenCrownDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260903102129_OutboxSentAtNullable")]
+    partial class OutboxSentAtNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,9 +123,6 @@ namespace GoldenCrown.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt")
-                        .HasFilter("\"SentAt\" IS NULL");
 
                     b.ToTable("OutboxMessages");
                 });

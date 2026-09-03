@@ -41,6 +41,7 @@ app.UseMiddleware<GoldenCrownAuthMiddleware>();
 app.MapControllers();
 
 /*--- Endpoint for distributed lock testing ---*/
+
 //app.MapGet("/debug/rate", async (IExchangeRateProvider provider, CancellationToken ct) => 
 //{
 //    var rate = await provider.GetRateAsync("USD", "EUR", ct);

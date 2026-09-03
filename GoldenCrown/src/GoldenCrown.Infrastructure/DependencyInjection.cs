@@ -31,6 +31,7 @@ namespace GoldenCrown.Infrastructure
             services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
             services.AddHostedService<SessionCleanupService>();
+            services.AddHostedService<OutboxBackgroundService>();
 
             services.AddHttpClient<ExchangeRateProvider>(c => 
                 {

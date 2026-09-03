@@ -1,6 +1,4 @@
 ﻿using GoldenCrown.Application.Abstractions;
-using GoldenCrown.Contracts;
-using GoldenCrown.Contracts.Events;
 using RabbitMQ.Client;
 using System.Text.Json;
 
@@ -15,16 +13,17 @@ namespace GoldenCrown.Infrastructure.Messaging.RabbitMQ
             _connectionManager = connectionManager;
         }
 
-        public async Task PublishAsync<T>(T message, CancellationToken cancellationToken)
+        public async Task PublishAsync(Guid messageId, string message, string messageType, CancellationToken cancellationToken)
         {
             await using var channel = await _connectionManager.CreateChannelAsync(cancellationToken);
             var body = JsonSerializer.SerializeToUtf8Bytes(message);
             var props = new BasicProperties
             {
+                MessageId = messageId.ToString(),
                 ContentType = "application/json",
                 DeliveryMode = DeliveryModes.Persistent
             };
-            var routingKey = GetRoutingKey(message!);
+            var routingKey = messageType;
             await channel.BasicPublishAsync(
                 exchange: "",
                 routingKey: routingKey,
@@ -33,12 +32,5 @@ namespace GoldenCrown.Infrastructure.Messaging.RabbitMQ
                 body: body,
                 cancellationToken: cancellationToken);
         }
-
-        private static string GetRoutingKey(object message) => message switch
-        {
-            TransferEvent => RoutingKeys.Transaction.TransactionSend,
-            DepositEvent => RoutingKeys.Transaction.TransactionDeposit,
-            _ => throw new InvalidOperationException($"Не задан routing key для {message.GetType().Name}.")
-        };
     }
 }

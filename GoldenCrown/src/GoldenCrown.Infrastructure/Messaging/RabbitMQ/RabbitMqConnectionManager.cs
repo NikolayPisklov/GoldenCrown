@@ -21,7 +21,7 @@ namespace GoldenCrown.Infrastructure.Messaging.RabbitMQ
         public async Task<IChannel> CreateChannelAsync(CancellationToken token)
         {
             var connection = await GetConnectionAsync(token);
-            return await connection.CreateChannelAsync(cancellationToken: token);
+            return await connection.CreateChannelAsync(new CreateChannelOptions(publisherConfirmationsEnabled: true, publisherConfirmationTrackingEnabled: true), cancellationToken: token);
         }
         public async ValueTask DisposeAsync()
         {
